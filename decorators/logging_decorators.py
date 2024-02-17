@@ -10,7 +10,6 @@ import os
 from dotenv import load_dotenv
 import functools
 
-
 # 自作モジュール
 from logger.debug_logger import Logger
 
@@ -28,9 +27,9 @@ def debug_logger_decorator(func):
 
     # *args=> 関数の引数に何を入れてもいい状態にする(位置引数)
     # **kwargs=> 引数に特別な要素の指定することができる（キーワード引数=> 辞書含む）
-    def wrapper(*args, **kwargs):  # args=> 関数に何を入れてもいい状態にする
+    def wrapper(*args, **kwargs):
         logger.debug(f"{func.__name__} スタート  args: {args} and kwargs: {kwargs}")
-        result = func(*args, **kwargs)  # 下の関数を呼び出してる
+        result = func(*args, **kwargs)  # 元の関数を呼び出してる
         logger.debug(f"{func.__name__} 完了  args: {args} and kwargs: {kwargs}")
         return result
     return wrapper
