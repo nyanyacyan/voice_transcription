@@ -1,0 +1,17 @@
+# 機密情報
+.env
+
+# ログファイルを無視
+logs/
+*.log
+
+*.json
+
+# 画像をアップロードしない
+*.jpeg
+*.png
+
+venv_shopers_scraping/
+
+# テストファイルを無視する。
+*test*
