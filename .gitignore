@@ -11,6 +11,14 @@ logs/
 *.jpeg
 *.png
 
+# 音声データ
+*.mp3
+*.wav
+
+# 動画データ
+*.mp4
+
+
 venv_shopers_scraping/
 
 # テストファイルを無視する。
