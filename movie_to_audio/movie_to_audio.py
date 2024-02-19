@@ -23,4 +23,4 @@ class Mp4ToWav:
         # 音声データに置き換え
         wav_file = AudioFileClip(movie_file)
         # 音声データを保存
-        wav_file.write_audiofile(movie_file.replace('.mp4', '.wav'))
+        wav_file.write_audiofile(movie_file.replace('.mp4', '.mp3'))
