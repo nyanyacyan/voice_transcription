@@ -34,3 +34,21 @@ def error_handling_decorator(func):
         except Exception as e:
             logger.debug(f"{func.__name__}処理中にエラーが起きました: {e}")
     return wrapper
+
+
+# 呼び出す際には「 @filenotfound_handling_decorator 」
+def filenotfound_handling_decorator(func):
+    @functools.wraps(func)
+
+    # *args=> 関数の引数に何を入れてもいい状態にする(位置引数)
+    # **kwargs=> 引数に特別な要素の指定することができる（キーワード引数=> 辞書含む）
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)  # 元の関数を呼び出してる
+        
+        except FileNotFoundError as e:
+            logger.debug(f"{func.__name__} ファイルが見つかりません: {e}")
+
+        except Exception as e:
+            logger.debug(f"{func.__name__}処理中にエラーが起きました: {e}")
+    return wrapper
