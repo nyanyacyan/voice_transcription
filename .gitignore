@@ -18,6 +18,9 @@ logs/
 # 動画データ
 *.mp4
 
+テキストデータ
+*.txt
+
 
 venv_shopers_scraping/
 

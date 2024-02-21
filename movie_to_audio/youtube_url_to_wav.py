@@ -33,4 +33,11 @@ class YoutubeToWav:
         }
 
         with YoutubeDL(ydl_opts) as ydl:
+            info_dict = ydl.extract_info(self.youtube_url, download=False)
+            movie_filename = ydl.prepare_filename(info_dict)
+
+            os.environ['YOUTUBE_MOVIE_FILENAME'] = movie_filename
+
             ydl.download([self.youtube_url])
+
+            print(f"ダウンロードファイル名: {movie_filename}")

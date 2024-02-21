@@ -22,16 +22,29 @@ class WhisperTranscription:
     @debug_logger_decorator
     @error_handling_decorator
     def whisper_transcription(self):
-        audio_file = os.getenv("AUDIO_FILE")
+        youtube_audio_file = os.getenv("AUDIO_FILE")
+        mp4_audio_file = os.getenv("MP4_FILE")
+        # youtube_audio_file = os.getenv("YOUTUBE_MOVIE_FILENAME")
+        # mp4_audio_file = os.getenv("MP4_MOVIE_FILENAME")
+        
+        # ここでモデルを調整する
         # tiny, base, small, medium, large-v2, large-v3
-        model = WhisperModel("tiny", device="cpu", compute_type="int8")
+        model = WhisperModel("base", device="cpu", compute_type="int8")
 
         # データをsegmentsとinfoに分けて保管
-        segments, info = model.transcribe(
-            audio_file,
+        if youtube_audio_file:
+            segments, info = model.transcribe(
+            youtube_audio_file,
             beam_size=5,  # 精度のクオリティを調節するもの数値を大きくする精度アップ時間ダウン
             vad_filter=True
         )
+        else:
+            segments, info = model.transcribe(
+            mp4_audio_file,
+            beam_size=5,  # 精度のクオリティを調節するもの数値を大きくする精度アップ時間ダウン
+            vad_filter=True
+        )
+
 
         print("表示する言語 '%s' 精度 %f\n" % (info.language, info.language_probability))
 
@@ -55,3 +68,7 @@ class WhisperTranscription:
         with open('whisper_write_file.txt', 'w', encoding='utf-8') as output_file:
             for segment in results:
                 output_file.write(f"{segment['start']} -> {segment['end']} {segment['text']})\n")
+
+if __name__ == '__main__':
+    whisper_inst = WhisperTranscription()
+    whisper_inst.whisper_transcription()
