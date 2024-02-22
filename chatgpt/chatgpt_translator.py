@@ -80,6 +80,7 @@ class ChatgptTranslator:
         translate_text = res.choices[0].message.content
         clean_text = translate_text.replace(')', '')
 
+        print(clean_text)
         return clean_text
     
 

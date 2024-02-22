@@ -18,7 +18,7 @@ logs/
 # 動画データ
 *.mp4
 
-テキストデータ
+# テキストデータ
 *.txt
 
 
@@ -26,3 +26,6 @@ venv_shopers_scraping/
 
 # テストファイルを無視する。
 *test*
+
+#  Excelデータ
+*.xlsx
