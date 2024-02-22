@@ -6,14 +6,13 @@
 #---バージョン---
 # Python==3.8.10
 # ----------------------------------------------------------------------------------
-import tiktoken
 import os
 from transformers import GPT2Tokenizer
 
 
 def chatgpt_text_split_save():
     file_path = "whisper_write_file.txt"
-    block_size = 3000  # このバーを超えたらテキストファイルを変える。少し余力を持ったものにする
+    block_size = 2000  # このバーを超えたらテキストファイルを変える。少し余力を持ったものにする
     separat_part = '\n'
     output_dir = "/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/data_division_box"
 
@@ -55,12 +54,8 @@ def chatgpt_text_split_save():
             os.makedirs(output_dir)
 
         for i, block in enumerate(blocks):
-            output_text = os.path.join(output_dir, f'text_block_{i+1}.txt')
+            output_text = os.path.join(output_dir, f'{i+1}_text_block.txt')
             with open(output_text, 'w', encoding='utf-8') as output_file:
                 output_file.write(block)
 
             print(f"{output_text} 保存完了")
-
-
-if __name__ == '__main__':
-    chatgpt_text_split_save()

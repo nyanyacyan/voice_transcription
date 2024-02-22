@@ -27,21 +27,22 @@ class ChatgptTranslator:
         self.logger = self.logger_instance.get_logger()
         self.debug_mode = debug_mode
 
-    @debug_logger_decorator
-    def read_file(self, file_path):
+    # @debug_logger_decorator
+    def read_file(self, before_text_file):
+        '''  文字起こしされたファイル読込
+
+        before_text_file-> 分割された翻訳前のテキストファイル
         '''
-        文字起こしされたファイル読込
-        '''
-        with open(file_path, 'r', encoding='utf-8') as file:
+        with open(before_text_file, 'r', encoding='utf-8') as file:
             return file.read()
 
-    @debug_logger_decorator
+    # @debug_logger_decorator
     def read_translation_instructions(self, translate_file):
         '''
         翻訳指示書を読込。全ての指示を１つに。
         '''
         df = pd.read_excel(translate_file, usecols=['from', 'to'])
-        ja_translate = []
+        full_instructions = []
 
         for _, row in df.iterrows():
 
@@ -50,14 +51,16 @@ class ChatgptTranslator:
 
             instruction_part = f'\n文章「{translate_part}」は「{ja_part}」と和訳\n'
 
-            ja_translate.append(instruction_part)
+            full_instructions.append(instruction_part)
 
-        return "".join(ja_translate)
+        return "".join(full_instructions)
 
-    @debug_logger_decorator
-    def chatgpt_request(self, before_text_file, ja_translate):
-        '''
-        ChatGPTへの指示書（余計な文字をクリーン）
+    # @debug_logger_decorator
+    def chatgpt_request(self, before_text_file, full_instructions):
+        '''  ChatGPTへの指示書（余計な文字をクリーン）
+
+        before_text_file-> 分割された翻訳前のテキストファイル
+        ja_translate-> read_translation_instructionsによって指示書から１つにまとめた依頼文
         '''
         res = self.client.chat.completions.create(
             # モデルを選択
@@ -67,7 +70,7 @@ class ChatgptTranslator:
             messages  = [
                 {"role": "system", "content": f'You are a helpful assistant that translates to Japanese.'},
                 {"role": "user",
-                "content": f"添付したテキストファイルを全て文章を和訳して全てを表示ほしい。「{before_text_file}」\n「添付したテキストファイル」に下記の文章があった場合には必ず指定した和訳に置き換えてください。{ja_translate}\n上記で指定した和訳が、ちゃんと反映してるかを確認してるかな？。"},
+                "content": f"添付したテキストファイルを全て文章を和訳して全てを表示ほしい。「{before_text_file}」\n「添付したテキストファイル」に下記の文章があった場合には必ず指定した和訳に置き換えてください。{full_instructions}\n上記で指定した和訳が、ちゃんと反映してるかを確認してるかな？。翻訳のみを返信してください。"},
             ] ,
 
             max_tokens  = 4096,             # 生成する文章の最大単語数
@@ -84,12 +87,15 @@ class ChatgptTranslator:
         return clean_text
     
 
-    @debug_logger_decorator
-    def chatgpt_translator(self, before_text_file_path, translate_file):
+    # @debug_logger_decorator
+    def chatgpt_translator(self, before_text_file, translate_file):
+        '''  メインメソッド　クラスの全てを並べ当てはめる
+
+        before_text_file-> 分割された翻訳前のテキストファイル
+        translate_file-> 翻訳指示書ファイル（Excelファイル）
         '''
-        メインメソッド
-        クラスの全てを並べ当てはめる
-        '''
-        before_text_file = self.read_file(before_text_file_path)
+        before_text_file = self.read_file(before_text_file)
         full_instructions = self.read_translation_instructions(translate_file)
-        self.chatgpt_request(before_text_file, full_instructions)
+        translated_text = self.chatgpt_request(before_text_file, full_instructions)
+
+        return translated_text
