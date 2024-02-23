@@ -70,7 +70,7 @@ class ChatgptTranslator:
             messages  = [
                 {"role": "system", "content": f'You are a helpful assistant that translates to Japanese.'},
                 {"role": "user",
-                "content": f"添付したテキストファイルを全て文章を和訳して全てを表示ほしい。「{before_text_file}」\n「添付したテキストファイル」に下記の文章があった場合には必ず指定した和訳に置き換えてください。{full_instructions}\n上記で指定した和訳が、ちゃんと反映してるかを確認してるかな？。翻訳のみを返信してください。"},
+                "content": f"添付したテキストファイルを必ず全て文章を和訳して全てを表示ほしい。「{before_text_file}」\n「添付したテキストファイル」に下記の文章があった場合には必ず指定した和訳に置き換えてください。{full_instructions}\n上記で指定した和訳が、ちゃんと反映してるかを確認してるかな？中略、続くなどで省略はしないでください。翻訳のみを返信してください。"},
             ] ,
 
             max_tokens  = 4096,             # 生成する文章の最大単語数
@@ -81,7 +81,9 @@ class ChatgptTranslator:
 
         # 応答
         translate_text = res.choices[0].message.content
-        clean_text = translate_text.replace(')', '')
+
+        # ChatGPTからの文章をクリーン-> 必要があれば追加していく
+        clean_text = translate_text.replace(')', '').replace('\n\n', '\n')
 
         print(clean_text)
         return clean_text

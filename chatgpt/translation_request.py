@@ -9,8 +9,10 @@
 # ----------------------------------------------------------------------------------
 import os
 import glob
+import re
 from dotenv import load_dotenv
 import concurrent.futures
+from tqdm import tqdm
 
 # 自作モジュール
 from logger.debug_logger import Logger
@@ -60,6 +62,7 @@ class TranslationRequest:
     
 
 
+
     # @debug_logger_decorator
     def translate_all_files(self, input_dir, output_dir, tranlate_instruction):
         '''  ディレクトリ全てのテキストファイルを読込→ 並列処理を定義→ 
@@ -82,8 +85,15 @@ class TranslationRequest:
             futures = [executor.submit(self.translate_and_save_file, file, tranlate_instruction, output_dir) for file in files]
 
             # concurrent.futures.as_completedにて完了通知をそれぞれの並列処理から受けることで、全ての処理が完了するのを待つ
-            for future in concurrent.futures.as_completed(futures):
-                print(f"パーツの翻訳処理完了 {future.result()}")
+            for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures), ncols=100, desc="ChatGPTからの返答"):
+                try:
+                    self.logger.debug("翻訳処理完了")
+
+                except Exception as e:
+                    self.logger.error(f"翻訳処理中にエラーが発生しました: {e}")
+
+
+
 
     # @debug_logger_decorator
     def merge_translated_files(self, output_dir, final_output_file):

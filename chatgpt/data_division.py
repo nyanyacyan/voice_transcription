@@ -59,3 +59,7 @@ def chatgpt_text_split_save():
                 output_file.write(block)
 
             print(f"{output_text} 保存完了")
+
+
+if __name__ == '__main__':
+    chatgpt_text_split_save()
