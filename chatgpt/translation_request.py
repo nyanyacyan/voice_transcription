@@ -34,7 +34,7 @@ class TranslationRequest:
         self.chatgpt_translator_inst = ChatgptTranslator(api_key)
 
 
-    # @debug_logger_decorator
+    @debug_logger_decorator
     def translate_and_save_file(self, before_file, tranlate_instruction, output_dir):
         ''' 処理のみ定義-> ファイルを読込-> 翻訳実行-> テキストファイルに書込
 
@@ -63,7 +63,7 @@ class TranslationRequest:
 
 
 
-    # @debug_logger_decorator
+    @debug_logger_decorator
     def translate_all_files(self, input_dir, output_dir, tranlate_instruction):
         '''  ディレクトリ全てのテキストファイルを読込→ 並列処理を定義→ 
 
@@ -95,7 +95,7 @@ class TranslationRequest:
 
 
 
-    # @debug_logger_decorator
+    @debug_logger_decorator
     def merge_translated_files(self, output_dir, final_output_file):
         '''  ディレクトリにあるテキストファイルをリスト化してインデックスの順番に並び替え-> それを順番にテキストファイルにまとめていく
         

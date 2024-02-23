@@ -1,6 +1,6 @@
 # coding: utf-8
 # ----------------------------------------------------------------------------------
-# loggerクラス
+# chatgpt翻訳リクエストクラス
 # 2023/2/18 制作
 
 #---バージョン---
@@ -8,7 +8,7 @@
 # ----------------------------------------------------------------------------------
 from openai import OpenAI
 import os
-import tiktoken
+import pickle
 from dotenv import load_dotenv
 import pandas as pd
 
@@ -36,24 +36,6 @@ class ChatgptTranslator:
         with open(before_text_file, 'r', encoding='utf-8') as file:
             return file.read()
 
-    # @debug_logger_decorator
-    def read_translation_instructions(self, translate_file):
-        '''
-        翻訳指示書を読込。全ての指示を１つに。
-        '''
-        df = pd.read_excel(translate_file, usecols=['from', 'to'])
-        full_instructions = []
-
-        for _, row in df.iterrows():
-
-            translate_part = row['from']
-            ja_part = row['to']
-
-            instruction_part = f'\n文章「{translate_part}」は「{ja_part}」と和訳\n'
-
-            full_instructions.append(instruction_part)
-
-        return "".join(full_instructions)
 
     # @debug_logger_decorator
     def chatgpt_request(self, before_text_file, full_instructions):
@@ -90,14 +72,13 @@ class ChatgptTranslator:
     
 
     # @debug_logger_decorator
-    def chatgpt_translator(self, before_text_file, translate_file):
+    def chatgpt_translator(self, before_text_file, full_instructions):
         '''  メインメソッド　クラスの全てを並べ当てはめる
 
         before_text_file-> 分割された翻訳前のテキストファイル
         translate_file-> 翻訳指示書ファイル（Excelファイル）
         '''
         before_text_file = self.read_file(before_text_file)
-        full_instructions = self.read_translation_instructions(translate_file)
         translated_text = self.chatgpt_request(before_text_file, full_instructions)
 
         return translated_text

@@ -68,7 +68,3 @@ class WhisperTranscription:
         with open('whisper_write_file.txt', 'w', encoding='utf-8') as output_file:
             for segment in results:
                 output_file.write(f"{segment['start']} -> {segment['end']} {segment['text']})\n")
-
-if __name__ == '__main__':
-    whisper_inst = WhisperTranscription()
-    whisper_inst.whisper_transcription()
