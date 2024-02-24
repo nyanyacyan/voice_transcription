@@ -29,3 +29,6 @@ venv_shopers_scraping/
 
 #  Excelデータ
 *.xlsx
+
+# dataフォルダ
+*data*

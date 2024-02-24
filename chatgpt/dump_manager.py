@@ -1,18 +1,23 @@
 # coding: utf-8
 # ----------------------------------------------------------------------------------
 # dumpクラス
-# 2023/2/18 制作
+# 2023/2/24 制作
 
 #---バージョン---
 # Python==3.8.10
+
+# ---流れ---
+# GUIで「辞書の更新」をクリック-> 始動-> 更新
 # ----------------------------------------------------------------------------------
 import os
+from dotenv import load_dotenv
 import pickle
 import pandas as pd
 
-# 自作モジュール
 from logger.debug_logger import Logger
 from my_decorators.logging_decorators import debug_logger_decorator
+
+load_dotenv()
 
 class DumpManager:
     '''  翻訳指示書を読込。全ての指示を１つに。
@@ -20,7 +25,7 @@ class DumpManager:
     translate_file-> 指示書をまとめたExcelファイル
     
     '''
-    def __init__(self, pickle_file='excel_data.pickle', debug_mode=False):
+    def __init__(self, pickle_file='/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/data/excel_data.pickle'):
         '''
         pickle_file-> pdにて保存して同じデータがないかを確認する場所
         '''
@@ -32,63 +37,61 @@ class DumpManager:
         self.logger = self.logger_instance.get_logger()
         self.debug_mode = debug_mode
 
-
+    @debug_logger_decorator
     def find_pickle_file(self):
-        # pickle_fileがあるかを確認
-        if os.path.exists(self.pickle_file):
-            # 'rb'はバイナリ読込モード
+        try:
             with open(self.pickle_file, 'rb') as handle:
                 # 解析開始
-                current_data = pickle.load(handle)
-            return current_data
+                existing_data = pickle.load(handle)
+            return existing_data
 
-        else:
+        except EOFError:
+            # もしファイルが空の場合に処理する
             # もしpickle_fileがなかったら新しいデータフレームを作成
-            current_data = pd.DataFrame(columns=['from', 'to', 'instruction'])
-            return current_data
+            existing_data = pd.DataFrame(columns=['from', 'to', 'instruction'])
+            return existing_data
 
-
+    @debug_logger_decorator
     def dataframe_updated(self, translate_file):
-        current_data = self.find_pickle_file(self.pickle_file)
+        existing_data = self.find_pickle_file()  # 既存データ
 
         # Excelファイルにあるデータをデータフレームに入れ込む（まだpickle_fileには書き込まれてない）
-        new_data = pd.read_excel(translate_file, usecols=['from', 'to'])
+        new_data = pd.read_excel(translate_file, usecols=['from', 'to'])  # 新しいデータ
 
-        # 　axisパラメーターは「.apply」メソッド時に使われる　axis=1は「列方向」に入れ込みたい-> fromとtoを入れている
+        # 　axisパラメーターは「.apply」メソッド時に使われる　axis=1は上から順番に行のデータを取得してる-> from列とto列の値を取得
+        # .applyは各列（axis=0）各行（axis=1）のデータを取得する
         new_data['instruction'] = new_data.apply(lambda row: f'\n文章「{row["from"]}」は「{row["to"]}」と和訳\n', axis=1)
 
-        # .set_index('from')部分をindexとする
-        # .combine_firstは古い情報を確認して新しいものだけを選択（補完）してくれてる
-        # .reset_index()これにより全てのデータをまとめる
+        updated_data = existing_data.copy()
+
+        # .iterrows()は１行ずつにアクセス
         for _, new_row in new_data.iterrows():
-            if new_row['from'] in current_data['from'].values:
-                current_data.loc[current_data['from'] == new_row['from'], ['to', 'instruction']] = new_row[['to', 'instruction']]
+            # もし既存データの中に新しいデータの中に同じ値があったら
+            if new_row['from'] in existing_data['from'].values:
+                # 既存データと新しいデータが同じデータがあった場合、既存データに新しいデータの'to'と'instruction'に入れ替える
+                existing_data.loc[existing_data['from'] == new_row['from'], ['to', 'instruction']] = new_row[['to', 'instruction']]
 
             else:
-                current_data = current_data.append(new_row, ignore_index=True)
+                # 同じではないものはそのまま既存データに追加する
+                # new_rowは新しい行を選択
+                # ignore_index=Trueは既存のindexルールがあっても無視して新しいindexを自動で割り当てる
+                updated_data = pd.concat([updated_data, pd.DataFrame([new_row])], ignore_index=True)
 
-        return current_data
 
+        return updated_data
 
+    @debug_logger_decorator
     def write_pickle_file(self, translate_file):
-        current_data = self.dataframe_updated(translate_file)
+        updated_data = self.dataframe_updated(translate_file)
+
+        print(updated_data['instruction'])
         # 'wb'はバイナリ書込モード
         # もしpickle_fileがなければ新規作成
         with open(self.pickle_file, 'wb') as handle:
-            pickle.dump(current_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump(updated_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-    def instructions_joint_text(self, translate_file):
-
-        ここでpickle_fileに書き込まれたものを３列目のinstructionだけを抽出してテキストにする
-        これをChatGPT側で読み込んで命令文にできるようにする。
-
-        updated_data = self.dataframe_updated(translate_file)
-        full_instructions = "".join(updated_data['instruction'].tolist())
-
-        return full_instructions
-    
-
-    def dump_manager():
-        '''  メインメソッド
-        '''
+if __name__ == '__main__':
+    translate_file = '翻訳指示ファイル.xlsx'
+    dump_manager_inst = DumpManager()
+    dump_manager_inst.write_pickle_file(translate_file)

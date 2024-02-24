@@ -16,10 +16,13 @@ import pandas as pd
 from logger.debug_logger import Logger
 from my_decorators.logging_decorators import debug_logger_decorator
 
+load_dotenv()
+
 class ChatgptTranslator:
-    def __init__(self, api_key, debug_mode=False):
+    def __init__(self, api_key, pickle_path = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/data/excel_data.pickle', debug_mode=False):
         self.api_key = api_key
         self.client = OpenAI(api_key=api_key)
+        self.pickle_path = pickle_path
 
         # Loggerクラスを初期化
         debug_mode = os.getenv('DEBUG_MODE', 'False') == 'True'
@@ -27,14 +30,23 @@ class ChatgptTranslator:
         self.logger = self.logger_instance.get_logger()
         self.debug_mode = debug_mode
 
-    # @debug_logger_decorator
-    def read_file(self, before_text_file):
+    @debug_logger_decorator
+    def text_read(self, before_text_file):
         '''  文字起こしされたファイル読込
 
         before_text_file-> 分割された翻訳前のテキストファイル
         '''
         with open(before_text_file, 'r', encoding='utf-8') as file:
             return file.read()
+        
+
+    def pickle_read(self):
+        with open(self.pickle_path, 'rb') as handle:
+            loaded_pickle_data = pickle.load(handle)
+
+            full_instructions = loaded_pickle_data['instruction']
+
+        return full_instructions
 
 
     # @debug_logger_decorator
@@ -78,7 +90,7 @@ class ChatgptTranslator:
         before_text_file-> 分割された翻訳前のテキストファイル
         translate_file-> 翻訳指示書ファイル（Excelファイル）
         '''
-        before_text_file = self.read_file(before_text_file)
+        before_text_file = self.text_read(before_text_file)
         translated_text = self.chatgpt_request(before_text_file, full_instructions)
 
         return translated_text
