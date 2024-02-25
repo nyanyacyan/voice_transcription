@@ -35,7 +35,7 @@ class AudioGuiController:
         '''
         mp4_data_dir = os.path.asbpath(os.path.dirname(__file__))
         mp4_data_path = filedialog.askdirectory(initialdir= mp4_data_dir)
-        entry1.set(mp4_data_path)  # 参照ボタン
+        # entry1.set(mp4_data_path)  # 参照ボタン
         
 
 
@@ -45,7 +45,7 @@ class AudioGuiController:
         '''
         mp3_data_dir = os.path.asbpath(os.path.dirname(__file__))
         mp3_data_path = filedialog.askdirectory(initialdir= mp3_data_dir)
-        entry2.set(mp3_data_path)  # 参照ボタン
+        # entry2.set(mp3_data_path)  # 参照ボタン
 
 
     def instructions_update_click(self):

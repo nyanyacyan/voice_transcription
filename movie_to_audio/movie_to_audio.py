@@ -19,7 +19,7 @@ load_dotenv()
 class Mp4ToWav:
     @debug_logger_decorator
     def mp4_to_wav(self):
-        movie_file = os.getenv('MP4_FILE')
+        movie_file = os.getenv('MP4_FILE_PATH')
         # 音声データに置き換え
         wav_file = AudioFileClip(movie_file)
 
