@@ -19,31 +19,26 @@ from my_decorators.error_handling_decorators import error_handling_decorator
 
 
 class WhisperTranscription:
+    def __init__(self, audio_file_path):
+        # ここにYouTubeとmp４それぞれが音声データに変換した入るのpath出す関数の返したものを入れる
+        self.audio_file_path = audio_file_path
+
     @debug_logger_decorator
     @error_handling_decorator
     def whisper_transcription(self):
-        youtube_audio_file = os.getenv("AUDIO_FILE")
-        mp4_audio_file = os.getenv("MP4_FILE")
-        # youtube_audio_file = os.getenv("YOUTUBE_MOVIE_FILENAME")
-        # mp4_audio_file = os.getenv("MP4_MOVIE_FILENAME")
         
         # ここでモデルを調整する
         # tiny, base, small, medium, large-v2, large-v3
         model = WhisperModel("base", device="cpu", compute_type="int8")
 
         # データをsegmentsとinfoに分けて保管
-        if youtube_audio_file:
-            segments, info = model.transcribe(
-            youtube_audio_file,
+        self.audio_file_path
+        segments, info = model.transcribe(
+            self.youtube_audio_file,
             beam_size=5,  # 精度のクオリティを調節するもの数値を大きくする精度アップ時間ダウン
             vad_filter=True
         )
-        else:
-            segments, info = model.transcribe(
-            mp4_audio_file,
-            beam_size=5,  # 精度のクオリティを調節するもの数値を大きくする精度アップ時間ダウン
-            vad_filter=True
-        )
+
 
 
         print("表示する言語 '%s' 精度 %f\n" % (info.language, info.language_probability))

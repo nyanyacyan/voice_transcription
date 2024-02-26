@@ -37,7 +37,7 @@ class DumpManager:
         self.logger = self.logger_instance.get_logger()
         self.debug_mode = debug_mode
 
-    @debug_logger_decorator
+
     def find_pickle_file(self):
         try:
             with open(self.pickle_file, 'rb') as handle:
@@ -51,7 +51,7 @@ class DumpManager:
             existing_data = pd.DataFrame(columns=['from', 'to', 'instruction'])
             return existing_data
 
-    @debug_logger_decorator
+
     def dataframe_updated(self, translate_file):
         existing_data = self.find_pickle_file()  # 既存データ
 
@@ -80,7 +80,7 @@ class DumpManager:
 
         return updated_data
 
-    @debug_logger_decorator
+
     def write_pickle_file(self, translate_file):
         updated_data = self.dataframe_updated(translate_file)
 
@@ -89,9 +89,3 @@ class DumpManager:
         # もしpickle_fileがなければ新規作成
         with open(self.pickle_file, 'wb') as handle:
             pickle.dump(updated_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-
-if __name__ == '__main__':
-    translate_file = '翻訳指示ファイル.xlsx'
-    dump_manager_inst = DumpManager()
-    dump_manager_inst.write_pickle_file(translate_file)

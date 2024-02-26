@@ -14,14 +14,21 @@ from tkinter import filedialog
 # 自作モジュール
 from movie_to_audio.youtube_url_to_wav import YoutubeToMp3
 from movie_to_audio.movie_to_audio import Mp4ToMp3
+
+from whisper.transcribe import WhisperTranscription
+from chatgpt.data_division import ChatgptTextSplitSave
+from chatgpt.translation_request import TranslationRequest
 from chatgpt.dump_manager import DumpManager
 
 # デコレーター
-from my_decorators.logging_decorators import debug_logger_decorator
+# from my_decorators.logging_decorators import debug_logger_decorator
+# from my_decorators.error_handling_decorators import error_handling_decorator
 
 
-dump_manager_inst = DumpManager()
+api_key = os.getenv('OPENAI_API_KEY')
 
+def error_message(message):
+    error_message_label.conging(text=message)
 
 
 def mp４_dirlog_click():
@@ -48,40 +55,95 @@ def mp3_dirlog_click():
         messagebox.showerror("エラー", "選択されたファイルが mp3 形式ではありません。")
 
 
-@debug_logger_decorator
+
 def instructions_update_click():
     '''
     辞書更新
     '''
-    dump_manager_inst.write_pickle_file()
+    translate_file = '翻訳指示ファイル.xlsx'
+    dump_manager_inst = DumpManager()
+    dump_manager_inst.write_pickle_file(translate_file)
+
 
 def youtube_process():
     '''
     '''
-    youtube_url = youtube_url_entry.get()
-    youtube_to_mp3_inst = YoutubeToMp3(youtube_url)
-    youtube_to_mp3_inst.youtube_to_mp3()
+    try:
+        youtube_url = youtube_url_entry.get()
+        youtube_to_mp3_inst = YoutubeToMp3(youtube_url)
+        audio_file = youtube_to_mp3_inst.youtube_to_mp3()
+        whisper_transcription_inst = WhisperTranscription(audio_file)
+        whisper_transcription_inst.whisper_transcription()
+        chatgpt_text_split_save_inst = ChatgptTextSplitSave()
+        chatgpt_text_split_save_inst.chatgpt_text_split_save()
+
+        input_dir = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/data_division_box'
+        output_dir = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/translate_after_box'
+        final_output_file = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/translated_completed.txt'
+        tranlate_instruction = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/翻訳指示ファイル.xlsx'
+
+        translation_req_class_inst = TranslationRequest(api_key=api_key)
+        translation_req_class_inst.translate_all_files(input_dir, output_dir, tranlate_instruction)
+        translation_req_class_inst.merge_translated_files(output_dir, final_output_file)
+
+    except TypeError as e:
+        error_message("テキストファイル生成ができてない可能性があります。{e}")
+
+    except Exception as e:
+        error_message("処理中にエラーが発生しました。{e}")
+
+    
 
 def mp4_process():
     '''
     '''
     mp4_path = mp4_path_entry.get()
     mp4_to_mp3_inst = Mp4ToMp3(mp4_path)
-    mp4_to_mp3_inst.mp4_to_mp3()
+    audio_file = mp4_to_mp3_inst.mp4_to_mp3()
+    whisper_transcription_inst = WhisperTranscription(audio_file)
+    whisper_transcription_inst.whisper_transcription()
+    chatgpt_text_split_save_inst = ChatgptTextSplitSave()
+    chatgpt_text_split_save_inst.chatgpt_text_split_save()
+
+    input_dir = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/data_division_box'
+    output_dir = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/translate_after_box'
+    final_output_file = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/translated_completed.txt'
+    tranlate_instruction = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/翻訳指示ファイル.xlsx'
+
+    translation_req_class_inst = TranslationRequest(api_key=api_key)
+    translation_req_class_inst.translate_all_files(input_dir, output_dir, tranlate_instruction)
+    translation_req_class_inst.merge_translated_files(output_dir, final_output_file)
 
 def mp3_process():
     '''
     '''
+    audio_file = mp3_path_entry.get()
+    whisper_transcription_inst = WhisperTranscription(audio_file)
+    whisper_transcription_inst.whisper_transcription()
+    chatgpt_text_split_save_inst = ChatgptTextSplitSave()
+    chatgpt_text_split_save_inst.chatgpt_text_split_save()
+
+    input_dir = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/data_division_box'
+    output_dir = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/translate_after_box'
+    final_output_file = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/translated_completed.txt'
+    tranlate_instruction = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/翻訳指示ファイル.xlsx'
+
+    translation_req_class_inst = TranslationRequest(api_key=api_key)
+    translation_req_class_inst.translate_all_files(input_dir, output_dir, tranlate_instruction)
+    translation_req_class_inst.merge_translated_files(output_dir, final_output_file)
 
 
-def submit_click_first_action():
+
+def submit_click():
     youtube_url = youtube_url_entry.get()
     mp4_path = mp4_path_entry.get()
     mp3_path = mp3_path_entry.get()
 
+    print(f"youtube_url: {youtube_url}, mp4_path: {mp4_path}, mp3_path: {mp3_path}")
+
     if not youtube_url and not mp4_path and not mp3_path:
-        messagebox.showerror("YouTubeのURL、mp4、mp3のいずれかの入力（選択）がされてません。")
-        return
+        messagebox.showerror("エラー", "YouTubeのURL、mp4、mp3のいずれかの入力（選択）がされてません。")
+    
     
     if youtube_url:
         youtube_process()
@@ -89,23 +151,6 @@ def submit_click_first_action():
         mp4_process()
     if mp3_path:
         mp3_process()
-
-
-
-
-
-
-def submit_click():
-    '''
-    1.どれを行うのかを判別する→YouTubeなのか？mp４なのか？mp３なのか？
-    2.判定によるものを実行（MP３ファイルはそのまま実行できるように）
-    3.辞書の更新を実施
-    4.文字起こしの実施
-    5.翻訳依頼
-    6.並列処理
-    完了時にメッセージボックスを出す。
-    '''
-
 
 
 
@@ -119,7 +164,7 @@ if __name__ == '__main__':
     # Window作成
     window = Tk()
     window.title("翻訳アプリ")
-    window.geometry('500x300')
+    window.geometry('500x320')
 
 
     # YouTubeフレーム作成
@@ -174,31 +219,37 @@ if __name__ == '__main__':
     mp3_button = ttk.Button(mp3_frame, text="選択", width=2.5, command=mp3_dirlog_click)
     mp3_button.grid(row=2, column=2, padx=(8, 0))
 
+    # error_messageフレーム作成
+    error_frame = ttk.Frame(window, padding=10)
+    error_frame.grid(row=3, column=0)
 
+    # error_messageラベル作成
+    error_message_label = ttk.Label(error_frame, text="", foreground="red")
+    error_message_label.grid(row=3, column=0)
 
 
     # dumpフレーム作成
-    dump_frame = ttk.Frame(window, padding=(60, 15, 10, 0))
-    dump_frame.grid(row=3, column=0)
+    dump_frame = ttk.Frame(window, padding=(60, 0, 10, 0))
+    dump_frame.grid(row=4, column=0)
     
     # dumpボタン作成
     update_button = ttk.Button(dump_frame, text="辞書更新", command=instructions_update_click)
-    update_button.grid(row=3, column=0, padx=5)
+    update_button.grid(row=4, column=0, padx=5)
 
 
 
     # Runningフレーム作成
     running_frame = ttk.Frame(window, padding=(60, 15, 10, 0))
-    running_frame.grid(row=4, column=0, )
+    running_frame.grid(row=5, column=0, )
 
 
     # runningボタン作成
     submit_button = ttk.Button(running_frame, text="翻訳開始", command=submit_click)
-    submit_button.grid(row=3, column=0, padx=20)
+    submit_button.grid(row=5, column=0, padx=20)
 
 
     # cancelボタン作成
     cancel_button = ttk.Button(running_frame, text="閉じる", command=quit)
-    cancel_button.grid(row=3, column=1, padx=20)
+    cancel_button.grid(row=5, column=1, padx=20)
 
     window.mainloop()
