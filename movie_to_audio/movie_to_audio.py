@@ -16,9 +16,9 @@ from my_decorators.logging_decorators import debug_logger_decorator
 
 load_dotenv()
 
-class Mp4ToWav:
+class Mp4ToMp3:
     @debug_logger_decorator
-    def mp4_to_wav(self):
+    def mp4_to_mp3(self):
         movie_file = os.getenv('MP4_FILE_PATH')
         # 音声データに置き換え
         wav_file = AudioFileClip(movie_file)

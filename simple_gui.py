@@ -12,53 +12,40 @@ from tkinter import messagebox
 from tkinter import filedialog
 
 # 自作モジュール
-from movie_to_audio.youtube_url_to_wav import YoutubeDL
+from movie_to_audio.youtube_url_to_wav import YoutubeToMp3
+from movie_to_audio.movie_to_audio import Mp4ToMp3
 from chatgpt.dump_manager import DumpManager
 
 # デコレーター
 from my_decorators.logging_decorators import debug_logger_decorator
 
 
-
-youtube_url_inst = YoutubeDL()
 dump_manager_inst = DumpManager()
 
-def youtube_url_env():
+
+
+def mp４_dirlog_click():
     '''
     音声データを抽出
     '''
-    youtube_url = youtube_url_input.get()
-    os.environ['YOUTUBE_URL'] = youtube_url
-
-
-
-def mp4_dirlog_click():
-    '''
-    音声データを抽出
-    '''
-    mp4_data_dir = os.path.asbpath(os.path.dirname(__file__))
-    mp4_path = filedialog.askdirectory(initialdir= mp4_data_dir)
-    if mp4_path.endswith('.mp4'):
-        mp4_entry.set(mp4_path)
+    mp4_path = filedialog.askopenfilename(filetypes=[("MP4.files", "*.mp4")])
+    if mp4_path:
+        mp4_path_entry.set(mp4_path)  # StringVarオブジェクトにパスを設定
+        os.environ['MP4_PATH'] = mp4_path
     else:
         messagebox.showerror("エラー", "選択されたファイルが mp4 形式ではありません。")
-
-    os.environ['MP4_PATH'] = mp4_path
 
 
 def mp3_dirlog_click():
     '''
     pathを取得するだけ
     '''
-    mp3_data_dir = os.path.asbpath(os.path.dirname(__file__))
-    mp3_path = filedialog.askdirectory(initialdir= mp3_data_dir)
-    if mp3_path.endswith('.mp3'):
-        mp3_entry.set(mp3_path)
-        
+    mp3_path = filedialog.askopenfilename(filetypes=[("MP3.files", "*.mp3")])
+    if mp3_path:
+        mp3_path_entry.set(mp3_path)  # StringVarオブジェクトにパスを設定
+        os.environ['MP3_PATH'] = mp3_path
     else:
         messagebox.showerror("エラー", "選択されたファイルが mp3 形式ではありません。")
-
-    os.environ['MP3_PATH'] = mp3_path
 
 
 @debug_logger_decorator
@@ -68,9 +55,47 @@ def instructions_update_click():
     '''
     dump_manager_inst.write_pickle_file()
 
+def youtube_process():
+    '''
+    '''
+    youtube_url = youtube_url_entry.get()
+    youtube_to_mp3_inst = YoutubeToMp3(youtube_url)
+    youtube_to_mp3_inst.youtube_to_mp3()
+
+def mp4_process():
+    '''
+    '''
+    mp4_path = mp4_path_entry.get()
+    mp4_to_mp3_inst = Mp4ToMp3(mp4_path)
+    mp4_to_mp3_inst.mp4_to_mp3()
+
+def mp3_process():
+    '''
+    '''
 
 
-def running_click():
+def submit_click_first_action():
+    youtube_url = youtube_url_entry.get()
+    mp4_path = mp4_path_entry.get()
+    mp3_path = mp3_path_entry.get()
+
+    if not youtube_url and not mp4_path and not mp3_path:
+        messagebox.showerror("YouTubeのURL、mp4、mp3のいずれかの入力（選択）がされてません。")
+        return
+    
+    if youtube_url:
+        youtube_process()
+    if mp4_path:
+        mp4_process()
+    if mp3_path:
+        mp3_process()
+
+
+
+
+
+
+def submit_click():
     '''
     1.どれを行うのかを判別する→YouTubeなのか？mp４なのか？mp３なのか？
     2.判定によるものを実行（MP３ファイルはそのまま実行できるように）
@@ -107,8 +132,8 @@ if __name__ == '__main__':
     youtube_url_label.grid(row=0, column=0)
 
     # youtubeのURL貼り付けエントリー
-    youtube_url_input = ttk.Entry(youtube_frame, width=25)
-    youtube_url_input.grid(row=0, column=1, padx=(10, 0))
+    youtube_url_entry = ttk.Entry(youtube_frame, width=25)
+    youtube_url_entry.grid(row=0, column=1, padx=(10, 0))
 
 
 
@@ -116,14 +141,14 @@ if __name__ == '__main__':
     mp4_frame = ttk.Frame(window, padding=(10, 3, 0, 10))
     mp4_frame.grid(row=1, column=0, sticky=W)
 
-    # mp４のURLを貼り付け箇所のラベル
-    mp4_url_label = ttk.Label(mp4_frame, text="       mp4", width=10, padding=(10, 10))
-    mp4_url_label.grid(row=1, column=0)
+    # mp４のpathを貼り付け箇所のラベル
+    mp4_path_label = ttk.Label(mp4_frame, text="       mp4", width=10, padding=(10, 10))
+    mp4_path_label.grid(row=1, column=0)
 
-    # mp４のURL貼り付けエントリー
-    mp4_entry = StringVar()
-    mp4_url_input = ttk.Entry(mp4_frame, textvariable=mp4_entry , width=25)
-    mp4_url_input.grid(row=1, column=1, padx=(10, 0))
+    # mp４のpath貼り付けエントリー
+    mp4_entry_var = StringVar()
+    mp4_path_entry = ttk.Entry(mp4_frame, textvariable=mp4_entry_var , width=25)
+    mp4_path_entry.grid(row=1, column=1, padx=(10, 0))
 
     # mp4ボタン作成
     mp4_button = ttk.Button(mp4_frame, text="選択", width=2.5, command=mp4_dirlog_click)
@@ -136,14 +161,14 @@ if __name__ == '__main__':
     mp3_frame = ttk.Frame(window, padding=(10, 3, 0, 10))
     mp3_frame.grid(row=2, column=0, sticky="W")
 
-    # mp４のURLを貼り付け箇所のラベル
-    mp3_url_label = ttk.Label(mp3_frame, text="       mp3", width=10, padding=(10, 10))
-    mp3_url_label.grid(row=2, column=0)
+    # mp４のpathを貼り付け箇所のラベル
+    mp3_path_label = ttk.Label(mp3_frame, text="       mp3", width=10, padding=(10, 10))
+    mp3_path_label.grid(row=2, column=0)
 
-    # mp４のURL貼り付けエントリー
-    mp3_entry = StringVar()
-    mp3_url_input = ttk.Entry(mp3_frame, textvariable=mp3_entry, width=25)
-    mp3_url_input.grid(row=2, column=1, padx=(10, 0))
+    # mp４のpath貼り付けエントリー
+    mp3_entry_var = StringVar()
+    mp3_path_entry = ttk.Entry(mp3_frame, textvariable=mp3_entry_var, width=25)
+    mp3_path_entry.grid(row=2, column=1, padx=(10, 0))
 
     # mp3ボタン作成
     mp3_button = ttk.Button(mp3_frame, text="選択", width=2.5, command=mp3_dirlog_click)
@@ -157,8 +182,8 @@ if __name__ == '__main__':
     dump_frame.grid(row=3, column=0)
     
     # dumpボタン作成
-    dump_button = ttk.Button(dump_frame, text="辞書更新", command=dump_manager)
-    dump_button.grid(row=3, column=0, padx=5)
+    update_button = ttk.Button(dump_frame, text="辞書更新", command=instructions_update_click)
+    update_button.grid(row=3, column=0, padx=5)
 
 
 
@@ -168,8 +193,8 @@ if __name__ == '__main__':
 
 
     # runningボタン作成
-    running_button = ttk.Button(running_frame, text="翻訳開始", command=running_click)
-    running_button.grid(row=3, column=0, padx=20)
+    submit_button = ttk.Button(running_frame, text="翻訳開始", command=submit_click)
+    submit_button.grid(row=3, column=0, padx=20)
 
 
     # cancelボタン作成

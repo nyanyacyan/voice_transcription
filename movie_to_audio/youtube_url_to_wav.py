@@ -16,12 +16,12 @@ from my_decorators.logging_decorators import debug_logger_decorator
 
 load_dotenv()
 
-class YoutubeToWav:
-    def __init__(self):
-        self.youtube_url = os.getenv('YOUTUBE_URL')
+class YoutubeToMp3:
+    def __init__(self,youtube_url):
+        self.youtube_url = youtube_url
         
     @debug_logger_decorator
-    def youtube_to_wav(self):
+    def youtube_to_mp3(self):
         ydl_opts = {
             'format': 'bestaudio/best',
             'postprocessors': [{
@@ -35,9 +35,5 @@ class YoutubeToWav:
         with YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(self.youtube_url, download=False)
             movie_filename = ydl.prepare_filename(info_dict)
-
-            os.environ['YOUTUBE_MOVIE_FILENAME'] = movie_filename
-
             ydl.download([self.youtube_url])
-
             print(f"ダウンロードファイル名: {movie_filename}")
