@@ -7,7 +7,7 @@
 # Python==3.8.10
 
 # --------------------------------------------------------------------------------
-import os
+import os,glob
 from dotenv import load_dotenv
 from yt_dlp import YoutubeDL
 
@@ -41,10 +41,25 @@ class YoutubeToMp3:
         if not os.path.exists(download_directory):
             os.makedirs(download_directory)
 
-        # 実際にクラスを使ってオブジェクトにしてるイメージ
+        # 実際にYoutubeDLクラスを使って上記で指定したオプションを使ってオブジェクトにしてるイメージ
         with YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(self.youtube_url, download=True)
-            movie_filename = ydl.prepare_filename(info_dict)
-            print(f"ダウンロードファイル名: {movie_filename}")
-            
-            return os.path.join(download_directory, movie_filename)
+            movie_title = info_dict.get('title', 'downloaded_file')
+            print(f"ダウンロードファイル名: {movie_title}")
+            return movie_title
+
+        
+    def find_youtube_file_fullpath(self):
+        download_dir = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/downloads'
+        
+        movie_title = self.youtube_to_mp3()
+        print(movie_title)
+
+        search_pattern = os.path.join(download_dir, f'*{movie_title}*.*')
+
+        matching_files = glob.glob(search_pattern)
+
+        if matching_files:
+            return matching_files[0]
+        raise Exception("ファイルが見つかりません。")
+

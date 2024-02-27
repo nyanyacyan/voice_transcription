@@ -13,20 +13,24 @@ from faster_whisper import WhisperModel
 
 load_dotenv()
 
-# 自作モジュール
-from my_decorators.logging_decorators import debug_logger_decorator
-from my_decorators.error_handling_decorators import error_handling_decorator
+from logger.debug_logger import Logger
+
 
 
 class WhisperTranscription:
-    def __init__(self, audio_file_path):
+    def __init__(self, audio_file_path, debug_mode=False):
+        # Loggerクラスを初期化
+        debug_mode = os.getenv('DEBUG_MODE', 'False') == 'True'
+        self.logger_instance = Logger(__name__, debug_mode=debug_mode)
+        self.logger = self.logger_instance.get_logger()
+        self.debug_mode = debug_mode
+
         # ここにYouTubeとmp４それぞれが音声データに変換した入るのpath出す関数の返したものを入れる
         self.audio_file_path = audio_file_path
 
-    @debug_logger_decorator
-    @error_handling_decorator
     def whisper_transcription(self):
-        
+        self.logger.debug(self.audio_file_path)
+
         # ここでモデルを調整する
         # tiny, base, small, medium, large-v2, large-v3
         model = WhisperModel("base", device="cpu", compute_type="int8")
@@ -34,7 +38,7 @@ class WhisperTranscription:
         # データをsegmentsとinfoに分けて保管
         self.audio_file_path
         segments, info = model.transcribe(
-            self.youtube_audio_file,
+            self.audio_file_path,
             beam_size=5,  # 精度のクオリティを調節するもの数値を大きくする精度アップ時間ダウン
             vad_filter=True
         )

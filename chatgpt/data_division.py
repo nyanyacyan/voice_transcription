@@ -10,7 +10,7 @@ import os
 from transformers import GPT2Tokenizer
 
 class ChatgptTextSplitSave:
-    def chatgpt_text_split_save():
+    def chatgpt_text_split_save(self):
         file_path = "whisper_write_file.txt"
         block_size = 1500  # このバーを超えたらテキストファイルを変える。少し余力を持ったものにする
         separat_part = '\n'

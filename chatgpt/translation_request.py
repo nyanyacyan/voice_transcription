@@ -34,7 +34,6 @@ class TranslationRequest:
         self.chatgpt_translator_inst = ChatgptTranslator(api_key)
 
 
-    @debug_logger_decorator
     def translate_and_save_file(self, before_file, tranlate_instruction, output_dir):
         ''' 処理のみ定義-> ファイルを読込-> 翻訳実行-> テキストファイルに書込
 
@@ -63,7 +62,6 @@ class TranslationRequest:
 
 
 
-    @debug_logger_decorator
     def translate_all_files(self, input_dir, output_dir, tranlate_instruction):
         '''  ディレクトリ全てのテキストファイルを読込→ 並列処理を定義→ 
 
@@ -95,7 +93,6 @@ class TranslationRequest:
 
 
 
-    @debug_logger_decorator
     def merge_translated_files(self, output_dir, final_output_file):
         '''  テキストファイルにまとめる処理
         
@@ -125,14 +122,12 @@ class TranslationRequest:
                     output_file.write(infile.read() + '\n')
 
 
-# # 使用例
-# if __name__ == '__main__':
-#     api_key = os.getenv('OPENAI_API_KEY')
+    def delete_text_files(self, data_division_box, translate_after_box):
+        all_text_files = glob.glob(os.path.join(data_division_box, '*.txt')) + glob.glob(os.path.join(translate_after_box, '*.txt'))
 
-#     input_dir = ''
-#     output_dir = ''
-#     final_output_file = ''
-
-#     translation_req_class_inst = TranslationRequest(api_key=api_key)
-#     translation_req_class_inst.translate_all_files(input_dir, output_dir)
-#     translation_req_class_inst.merge_translated_files(output_dir, final_output_file)
+        for file_path in all_text_files:
+            try:
+                os.remove(file_path)
+                print(f"{file_path} を削除しました。")
+            except Exception as e:
+                print(f"{file_path} の削除中にエラーが発生しました: {e}")
