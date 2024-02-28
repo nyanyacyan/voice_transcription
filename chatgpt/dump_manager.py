@@ -41,6 +41,7 @@ class DumpManager:
     def find_pickle_file(self):
         try:
             with open(self.pickle_file, 'rb') as handle:
+                self.logger.debug("pickleファイル発見。解析開始")
                 # 解析開始
                 existing_data = pickle.load(handle)
             return existing_data
@@ -48,6 +49,7 @@ class DumpManager:
         except EOFError:
             # もしファイルが空の場合に処理する
             # もしpickle_fileがなかったら新しいデータフレームを作成
+            self.logger.debug("ファイルが空。新しいデータフレーム作成開始")
             existing_data = pd.DataFrame(columns=['from', 'to', 'instruction'])
             return existing_data
 
@@ -60,11 +62,14 @@ class DumpManager:
 
         # 　axisパラメーターは「.apply」メソッド時に使われる　axis=1は上から順番に行のデータを取得してる-> from列とto列の値を取得
         # .applyは各列（axis=0）各行（axis=1）のデータを取得する
-        new_data['instruction'] = new_data.apply(lambda row: f'「{row["from"]}」は「{row["to"]}」と和訳を指定してください。', axis=1)
+        self.logger.debug("和訳を指定する文章を作成開始（３列目）")
+        new_data['instruction'] = new_data.apply(lambda row: f'上記の文章の中に「{row["from"]}」という文章があった場合には「{row["to"]}」と和訳を指定してください。', axis=1)
+        self.logger.debug("和訳を指定する文章を作成完了")
 
         updated_data = existing_data.copy()
 
         # .iterrows()は１行ずつにアクセス
+        self.logger.debug("和訳を指定する文章を作成完了")
         for _, new_row in new_data.iterrows():
             # もし既存データの中に新しいデータの中に同じ値があったら
             if new_row['from'] in existing_data['from'].values:
@@ -84,7 +89,14 @@ class DumpManager:
     def write_pickle_file(self, translate_file):
         updated_data = self.dataframe_updated(translate_file)
 
+        updated_data.reset_index(drop=True, inplace=True)
+
+        pd.set_option('display.max_columns', None)
+
+
+        
         print(updated_data['instruction'])
+
         # 'wb'はバイナリ書込モード
         # もしpickle_fileがなければ新規作成
         with open(self.pickle_file, 'wb') as handle:

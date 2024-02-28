@@ -71,6 +71,8 @@ def instructions_update_click():
     '''
     translate_file = '翻訳指示ファイル.xlsx'
     dump_manager_inst = DumpManager()
+    dump_manager_inst.find_pickle_file()
+    dump_manager_inst.dataframe_updated(translate_file)
     dump_manager_inst.write_pickle_file(translate_file)
     messagebox.showinfo("更新完了", "更新が完了しました。")
 

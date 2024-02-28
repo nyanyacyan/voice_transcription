@@ -123,11 +123,27 @@ class TranslationRequest:
 
 
     def delete_text_files(self, data_division_box, translate_after_box):
-        all_text_files = glob.glob(os.path.join(data_division_box, '*.txt')) + glob.glob(os.path.join(translate_after_box, '*.txt'))
+        division_text_files = glob.glob(os.path.join(data_division_box, '*.txt'))
+        after_text_files = glob.glob(os.path.join(translate_after_box, '*.txt'))
 
-        for file_path in all_text_files:
-            try:
-                os.remove(file_path)
-                print(f"{file_path} を削除しました。")
-            except Exception as e:
-                print(f"{file_path} の削除中にエラーが発生しました: {e}")
+        if not division_text_files:
+            self.logger.error(f"ファイルが見つかりません: {e}")
+        else:
+            for file_path in division_text_files:
+                try:
+                    os.remove(file_path)
+                    self.logger.debug(f"{file_path} を全て削除")
+                except Exception as e:
+                    self.logger.error(f"{file_path} の削除中にエラーが発生しました: {e}")
+
+        if not division_text_files:
+            self.logger.error(f"ファイルが見つかりません: {e}")
+        else:
+            for file_path in after_text_files:
+                try:
+                    os.remove(file_path)
+                    self.logger.debug(f"{file_path} を削除しました。")
+
+                except Exception as e:
+                    self.logger.error(f"{file_path} の削除中にエラーが発生しました: {e}")
+

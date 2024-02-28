@@ -38,16 +38,21 @@ class ChatgptTranslator:
         '''
         with open(before_text_file, 'r', encoding='utf-8') as file:
             return file.read()
-        
+
 
     def pickle_read(self):
         with open(self.pickle_path, 'rb') as handle:
             loaded_pickle_data = pickle.load(handle)
+        self.logger.info(loaded_pickle_data['instruction'])
+        try:
+            instructions = '\n'.join([''.join(x).strip() for x in loaded_pickle_data['instruction'].tolist()])
+            self.logger.info(f'instructions: {instructions}')
 
-            full_instructions = loaded_pickle_data['instruction']
+        except Exception as e:
+            raise self.logger.error(f"Error: {e}")
 
-        self.logger.debug(full_instructions)
-        return full_instructions
+        
+        return instructions
 
 
     # @debug_logger_decorator
@@ -57,14 +62,13 @@ class ChatgptTranslator:
         before_text_file-> 分割された翻訳前のテキストファイル
         ja_translate-> read_translation_instructionsによって指示書から１つにまとめた依頼文
         '''
-        self.logger.info('')
         self.logger.info(f"before_text_file: {before_text_file}")
         self.logger.info(f"full_instructions: {full_instructions}")
         # メッセージ内容を構築
         messages  = [
             {"role": "system", "content": f'You are a helpful assistant that translates to Japanese.'},
             {"role": "user",
-            "content": f"添付したテキストファイルを必ず全て文章を和訳して全てを表示ほしい。「{before_text_file}」\n「添付したテキストファイル」に下記の文章があった場合には必ず指定した和訳に置き換えてください。{full_instructions}\n上記で指定した和訳が、ちゃんと反映してるかを確認してるかな？中略、続くなどで省略はしないでください。翻訳のみを返信してください。"},
+            "content": f"{before_text_file}\n上記のある「英語」「韓国語」のみを全て和訳してください。\n{full_instructions}\n上記で指定した和訳が、ちゃんと反映してるかを確認してください。\nまた中略、続くなどを使っての省略は一切しないでください。\n必ず翻訳のみを返信してください。"},
         ]
         # メッセージ内容をコンソールに出力
         self.logger.debug("送信するメッセージ内容:")
@@ -87,6 +91,8 @@ class ChatgptTranslator:
         # 応答
         translate_text = res.choices[0].message.content
 
+        self.logger.info(translate_text)
+
         # ChatGPTからの文章をクリーン-> 必要があれば追加していく
         clean_text = translate_text.replace(')', '').replace('\n\n', '\n')
 
@@ -105,6 +111,7 @@ class ChatgptTranslator:
         before_text_file = self.text_read(before_text_file)
         self.logger.info("pickleファイルの読み込み開始")
         full_instructions = self.pickle_read()
+        self.logger.debug(full_instructions)
         translated_text = self.chatgpt_request(before_text_file, full_instructions)
 
         return translated_text
