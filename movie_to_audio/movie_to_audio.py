@@ -7,25 +7,42 @@
 # Python==3.8.10
 
 # --------------------------------------------------------------------------------
-import os
+import os,glob
+import ffmpeg
 from dotenv import load_dotenv
 from moviepy.editor import AudioFileClip
 
 # 自作モジュール
-from my_decorators.logging_decorators import debug_logger_decorator
+from logger.debug_logger import Logger
 
 load_dotenv()
 
 class Mp4ToMp3:
-    def __init__(self, mp4_path):
+    def __init__(self, mp4_path, debug_mode=False):
         self.mp4_path = mp4_path
 
-    @debug_logger_decorator
+        # Loggerクラスを初期化
+        debug_mode = os.getenv('DEBUG_MODE', 'False') == 'True'
+        self.logger_instance = Logger(__name__, debug_mode=debug_mode)
+        self.logger = self.logger_instance.get_logger()
+        self.debug_mode = debug_mode
+
+
     def mp4_to_mp3(self):
         mp4_file = self.mp4_path
-        # 音声データに置き換え
-        wav_file = AudioFileClip(mp4_file)
+        download_directory = "downloads"
 
-        new_mp3_filename = mp4_file.replace('.mp4', '.mp3')
+        # ファイル名を取得
+        base_filename = os.path.basename(mp4_file)
+
+        # ファイル名の拡張子を変更
+        new_mp3_filename = base_filename.replace('.mp4', '.mp3')
+
+        # 指定したディレクトリとファイル名を繋ぎ合わせてフルパスに
+        full_mp3_path = os.path.join(download_directory, new_mp3_filename)
+
+        mp3_file = AudioFileClip(mp4_file)
         # 音声データを保存
-        wav_file.write_audiofile(new_mp3_filename)
+        mp3_file.write_audiofile(full_mp3_path)
+
+        return full_mp3_path

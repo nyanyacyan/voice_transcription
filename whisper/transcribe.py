@@ -13,6 +13,7 @@ from faster_whisper import WhisperModel
 
 load_dotenv()
 
+# 自作モジュール
 from logger.debug_logger import Logger
 
 
@@ -45,7 +46,7 @@ class WhisperTranscription:
 
 
 
-        print("表示する言語 '%s' 精度 %f\n" % (info.language, info.language_probability))
+        self.logger.debug("表示する言語 '%s' 精度 %f\n" % (info.language, info.language_probability))
 
         results = []
 

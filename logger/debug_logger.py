@@ -64,7 +64,7 @@ class Logger:
                 self.logger.addHandler(file_handler)
 
         except Exception as e:
-            print(f"ロガー設定中にエラーが発生しました: {e}")
+            self.logger.error(f"ロガー設定中にエラーが発生しました: {e}")
 
 
     def get_logger(self):

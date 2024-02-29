@@ -95,7 +95,7 @@ class DumpManager:
 
 
         
-        print(updated_data['instruction'])
+        self.logger.debug(updated_data['instruction'])
 
         # 'wb'はバイナリ書込モード
         # もしpickle_fileがなければ新規作成

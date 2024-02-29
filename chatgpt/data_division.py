@@ -9,10 +9,21 @@
 import os
 from transformers import GPT2Tokenizer
 
+# 自作モジュール
+from logger.debug_logger import Logger
+
 class ChatgptTextSplitSave:
+    def __init__(self, debug_mode=False):
+        # Loggerクラスを初期化
+        debug_mode = os.getenv('DEBUG_MODE', 'False') == 'True'
+        self.logger_instance = Logger(__name__, debug_mode=debug_mode)
+        self.logger = self.logger_instance.get_logger()
+        self.debug_mode = debug_mode
+        
+
     def chatgpt_text_split_save(self):
         file_path = "whisper_write_file.txt"
-        block_size = 1500  # このバーを超えたらテキストファイルを変える。少し余力を持ったものにする
+        block_size = 7000  # このバーを超えたらテキストファイルを変える。少し余力を持ったものにする
         separat_part = '\n'
         output_dir = "/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/data_division_box"
 
@@ -58,4 +69,4 @@ class ChatgptTextSplitSave:
                 with open(output_text, 'w', encoding='utf-8') as output_file:
                     output_file.write(block)
 
-                print(f"{output_text} 保存完了")
+                self.logger.debug(f"{output_text} 保存完了")

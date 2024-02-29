@@ -13,7 +13,7 @@ from tkinter import messagebox
 from tkinter import filedialog
 
 # 自作モジュール
-from movie_to_audio.youtube_url_to_wav import YoutubeToMp3
+from movie_to_audio.youtube_url import YoutubeToMp3
 from movie_to_audio.movie_to_audio import Mp4ToMp3
 
 from whisper.transcribe import WhisperTranscription
@@ -38,31 +38,6 @@ api_key = os.getenv('OPENAI_API_KEY')
 
 def error_message(message):
     error_message_label.config(text=message)
-
-
-def mp４_dirlog_click():
-    '''
-    音声データを抽出
-    '''
-    mp4_path = filedialog.askopenfilename(filetypes=[("MP4.files", "*.mp4")])
-    if mp4_path:
-        mp4_path_entry.set(mp4_path)  # StringVarオブジェクトにパスを設定
-        os.environ['MP4_PATH'] = mp4_path
-    else:
-        messagebox.showerror("エラー", "選択されたファイルが mp4 形式ではありません。")
-
-
-def mp3_dirlog_click():
-    '''
-    pathを取得するだけ
-    '''
-    mp3_path = filedialog.askopenfilename(filetypes=[("MP3.files", "*.mp3")])
-    if mp3_path:
-        mp3_path_entry.set(mp3_path)  # StringVarオブジェクトにパスを設定
-        os.environ['MP3_PATH'] = mp3_path
-    else:
-        messagebox.showerror("エラー", "選択されたファイルが mp3 形式ではありません。")
-
 
 
 def instructions_update_click():
@@ -103,11 +78,11 @@ def youtube_process():
         messagebox.showinfo("完了通知", "翻訳が完了しました。\ntranslated_completed.txtをご覧ください。")
 
     except TypeError as e:
-        print(f"TypeError: {e}")
+        logger.error(f"TypeError: {e}")
         error_message(f"テキストファイル生成ができてない可能性があります。{e}")
 
     except Exception as e:
-        print(f"error: {e}")
+        logger.error(f"error: {e}")
         error_message(f"処理中にエラーが発生しました。{e}")
 
     
@@ -137,11 +112,11 @@ def mp4_process():
         messagebox.showinfo("完了通知", "翻訳が完了しました。\ntranslated_completed.txtをご覧ください。")
 
     except TypeError as e:
-        print(f"TypeError: {e}")
+        logger.error(f"TypeError: {e}")
         error_message(f"テキストファイル生成ができてない可能性があります。{e}")
 
     except Exception as e:
-        print(f"error: {e}")
+        logger.error(f"error: {e}")
         error_message(f"処理中にエラーが発生しました。{e}")
 
 
@@ -153,15 +128,24 @@ def mp3_process():
     final_output_file = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/translated_completed.txt'
     tranlate_instruction = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/翻訳指示ファイル.xlsx'
 
-    audio_file = mp3_path_entry.get()
-    whisper_transcription_inst = WhisperTranscription(audio_file)
-    whisper_transcription_inst.whisper_transcription()
-    chatgpt_text_split_save_inst = ChatgptTextSplitSave()
-    chatgpt_text_split_save_inst.chatgpt_text_split_save()
-    translation_req_class_inst = TranslationRequest(api_key=api_key)
-    translation_req_class_inst.translate_all_files(input_dir, output_dir, tranlate_instruction)
-    translation_req_class_inst.merge_translated_files(output_dir, final_output_file)
+    try:
+        audio_file = mp3_path_entry.get()
+        whisper_transcription_inst = WhisperTranscription(audio_file)
+        whisper_transcription_inst.whisper_transcription()
+        chatgpt_text_split_save_inst = ChatgptTextSplitSave()
+        chatgpt_text_split_save_inst.chatgpt_text_split_save()
+        translation_req_class_inst = TranslationRequest(api_key=api_key)
+        translation_req_class_inst.translate_all_files(input_dir, output_dir, tranlate_instruction)
+        translation_req_class_inst.merge_translated_files(output_dir, final_output_file)
+        messagebox.showinfo("完了通知", "翻訳が完了しました。\ntranslated_completed.txtをご覧ください。")
 
+    except TypeError as e:
+        logger.error(f"TypeError: {e}")
+        error_message(f"テキストファイル生成ができてない可能性があります。{e}")
+
+    except Exception as e:
+        logger.error(f"error: {e}")
+        error_message(f"処理中にエラーが発生しました。{e}")
 
 
 def submit_click():
@@ -169,7 +153,7 @@ def submit_click():
     mp3_path = mp3_path_entry.get()
     mp4_path = mp4_path_entry.get()
 
-    print(f"youtube_url: {youtube_url}, mp4_path: {mp4_path}, mp3_path: {mp3_path}")
+    logger.debug(f"youtube_url: {youtube_url}, mp4_path: {mp4_path}, mp3_path: {mp3_path}")
 
     if not youtube_url and not mp4_path and not mp3_path:
         messagebox.showerror("エラー", "YouTubeのURL、mp4、mp3のいずれかの入力（選択）がされてません。")
@@ -225,10 +209,31 @@ if __name__ == '__main__':
     mp4_path_entry = ttk.Entry(mp4_frame, textvariable=mp4_entry_var , width=25)
     mp4_path_entry.grid(row=1, column=1, padx=(10, 0))
 
+
+    def mp４_dirlog_click():
+        '''
+        音声データを抽出
+        '''
+        mp4_path = filedialog.askopenfilename(filetypes=[("MP4.files", "*.mp4")])
+
+        # もしmp4_pathがなかったらリターン（何もせず抜ける）を返す
+        if not mp4_path:
+            return
+        
+        # .lower()-> 全てを小文字にする　mp4の部分を大文字が混ざってしまう可能性があるため
+        # .endswith('.mp4')-> 拡張子部分を取得して引数に指定されてるものになってるか確認
+        # もし拡張子がmp4でなかったらエラーメッセージを出す。
+        if not mp4_path.lower().endswith('.mp4'):
+            messagebox.showerror("エラー", "選択されたファイルが mp4 形式ではありません。")
+
+        else:
+            # 上記以外のものだったらパスを取得して反映
+            mp4_entry_var.set(mp4_path)  # StringVarオブジェクトにパスを設定
+
+
     # mp4ボタン作成
     mp4_button = ttk.Button(mp4_frame, text="選択", width=2.5, command=mp4_dirlog_click)
     mp4_button.grid(row=1, column=2, padx=(8, 0))
-
 
 
 
@@ -245,9 +250,32 @@ if __name__ == '__main__':
     mp3_path_entry = ttk.Entry(mp3_frame, textvariable=mp3_entry_var, width=25)
     mp3_path_entry.grid(row=2, column=1, padx=(10, 0))
 
+
+    def mp3_dirlog_click():
+        '''
+        pathを取得するだけ
+        '''
+        mp3_path = filedialog.askopenfilename(filetypes=[("MP3.files", "*.mp3")])
+
+        # もしmp3_pathがなかったらリターン（何もせず抜ける）を返す
+        if not mp3_path:
+            return
+        
+        # .lower()-> 全てを小文字にする　mp3の部分を大文字が混ざってしまう可能性があるため
+        # .endswith('.mp3')-> 拡張子部分を取得して引数に指定されてるものになってるか確認
+        # もし拡張子がmp3でなかったらエラーメッセージを出す。
+        if not mp3_path.lower().endswith('.mp3'):
+            messagebox.showerror("エラー", "選択されたファイルが mp3 形式ではありません。")
+
+        else:
+            # 上記以外のものだったらパスを取得して反映
+            mp3_entry_var.set(mp3_path)  # StringVarオブジェクトにパスを設定
+
     # mp3ボタン作成
     mp3_button = ttk.Button(mp3_frame, text="選択", width=2.5, command=mp3_dirlog_click)
     mp3_button.grid(row=2, column=2, padx=(8, 0))
+
+
 
     # error_messageフレーム作成
     error_frame = ttk.Frame(window, padding=10, width=480)

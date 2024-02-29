@@ -48,7 +48,7 @@ class TranslationRequest:
 
         # 翻訳クラスの実行（実行時、API KEYが必要）
         translated_text = self.chatgpt_translator_inst.chatgpt_translator(before_file, tranlate_instruction)
-        self.logger.info(f"受け取った翻訳内容: {translated_text}")
+        self.logger.debug(f"受け取った翻訳内容: {translated_text}")
 
         # output_dir + base_name（元々のファイル名）することでパスにしてる
         output_path = os.path.join(output_dir, base_name)

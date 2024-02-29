@@ -14,7 +14,7 @@ from tkinter import messagebox
 from tkinter import filedialog
 
 # 自作モジュール
-from movie_to_audio.youtube_url_to_wav import YoutubeDL
+from movie_to_audio.youtube_url import YoutubeDL
 from chatgpt.dump_manager import DumpManager
 
 class AudioGuiController:
