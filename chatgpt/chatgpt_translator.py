@@ -69,12 +69,20 @@ class ChatgptTranslator:
         messages  = [
             {"role": "system", "content": f'You are a helpful assistant that translates to Japanese.'},
             {"role": "user",
-            "content": f"{before_text_file}\n上記のある「英語」「韓国語」のみを全て和訳してください。\n{full_instructions}\n上記で指定した和訳が、ちゃんと反映してるかを確認してください。\nまた以下のことを必ず守って返信してください\n1. 中略、続くなどを使っての省略は一切しないでください。\n2. タイムスタンプ部分は省略しないでください。\n3. 改行は文章の終わりのみにしてください。\n4. コメントはせずに翻訳のみを返信してください。"},
+            "content": f"翻訳指示:\n\n1. 翻訳対象: このリクエストに含まれる英語および韓国語のテキストを全て日本語に翻訳してください。\n\n2. 特定用語の指定翻訳:\n{full_instructions}\n\n3. 翻訳のルール:\n・省略せずに全文を翻訳してください。\n・タイムスタンプは原文どおりに保持してください。\n・改行は各テキストブロックの終わりにのみ行ってください。\n・翻訳の際、コメントは加えないでください。\n改善された翻訳指示の例:\n翻訳テキストを提出する際には、以下のフォーマットルールに注意してください：\n\n\n**タイムスタンプと翻訳テキストは同じ行に記載してください。**タイムスタンプの直後に翻訳テキストを続けてください。改行は許可されていません。\n\n正しい例: 14.69 -> 17.39 こんにちは！今日の仕事はどうですか？\n\n誤った例: 14.69 -> 17.39\nこんにちは！今日の仕事はどうですか？\n\n**改行は各テキストブロックの終わり、つまり一連の対話や段落が完全に終了した後のみに行ってください。**これは、テキストが読みやすく、整理されていることを保証するためです。\n\nテキスト:\n{before_text_file}\n\n"},
         ]
         # メッセージ内容をコンソールに出力
-        self.logger.debug("送信するメッセージ内容:")
+        chatgpt_to_sentence = []
+
         for message in messages:
-            self.logger.debug(f"役割: {message['role']}, 内容: {message['content']}")
+            self.logger.debug(f"内容: \n{message['content']}")
+            chatgpt_to_sentence.append(message['content'])
+
+        # リストはそのままでは書き込めないから分岐させる
+        content_to_write = "\n".join(chatgpt_to_sentence)
+
+        with open('chatgpt_to_sentence.txt', 'w', encoding='utf-8') as f:
+            f.write(content_to_write)
 
         # OpenAI APIへのリクエスト送信
         res = self.client.chat.completions.create(

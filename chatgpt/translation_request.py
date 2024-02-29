@@ -43,6 +43,7 @@ class TranslationRequest:
         '''
 
         # ファイル名を取得
+        self.logger.debug("並行処理スタート")
         base_name = os.path.basename(before_file)
         self.logger.debug(f"読込する分割されたファイル名: {base_name}")
 
@@ -58,6 +59,8 @@ class TranslationRequest:
         
         self.logger.debug(output_path)
         return output_path
+
+        self.logger.debug("並行処理完了")
     
 
 
@@ -79,13 +82,22 @@ class TranslationRequest:
         # with concurrent.futures.ThreadPoolExecutor() as executor:によって並列処理の準備をする（ThreadPoolExecutorのインスタンス化）
         with concurrent.futures.ThreadPoolExecutor() as executor:
 
-            # 各ファイルに対してtranslate_and_save_file関数を処理する→あるファイル全てをexecutorによって並列処理する
+            # 各ファイルに対してtranslate_and_save_file関数を処理する→存在するファイル全てをexecutorによって並列処理する
             futures = [executor.submit(self.translate_and_save_file, file, tranlate_instruction, output_dir) for file in files]
 
+            processed_count = 0
+
             # concurrent.futures.as_completedにて完了通知をそれぞれの並列処理から受けることで、全ての処理が完了するのを待つ
+            self.logger.debug("並行処理スタート")
             for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures), ncols=100, desc="ChatGPTからの返答"):
                 try:
-                    self.logger.debug("翻訳処理完了")
+                    result = future.result()
+                    if result or result.isspace() or len(result) < 30:
+                        self.logger.error(f"ChatGPTのレスポンスが期待してるものを返してない可能性があります（明らかに文字数が少ない）")
+                        
+                    else:
+                        self.logger.debug("翻訳処理完了")
+                        processed_count += 1
 
                 except Exception as e:
                     self.logger.error(f"翻訳処理中にエラーが発生しました: {e}")

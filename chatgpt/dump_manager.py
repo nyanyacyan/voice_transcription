@@ -63,7 +63,7 @@ class DumpManager:
         # 　axisパラメーターは「.apply」メソッド時に使われる　axis=1は上から順番に行のデータを取得してる-> from列とto列の値を取得
         # .applyは各列（axis=0）各行（axis=1）のデータを取得する
         self.logger.debug("和訳を指定する文章を作成開始（３列目）")
-        new_data['instruction'] = new_data.apply(lambda row: f'上記の文章の中に「{row["from"]}」という文章があった場合には「{row["to"]}」と和訳を指定してください。', axis=1)
+        new_data['instruction'] = new_data.apply(lambda row: f'・「{row["from"]}」は「{row["to"]}」と和訳してください。', axis=1)
         self.logger.debug("和訳を指定する文章を作成完了")
 
         updated_data = existing_data.copy()

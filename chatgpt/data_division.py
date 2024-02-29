@@ -23,12 +23,13 @@ class ChatgptTextSplitSave:
 
     def chatgpt_text_split_save(self):
         file_path = "whisper_write_file.txt"
-        block_size = 7000  # このバーを超えたらテキストファイルを変える。少し余力を持ったものにする
+        block_size = 2500  # このバーを超えたらテキストファイルを変える。少し余力を持ったものにする
         separat_part = '\n'
         output_dir = "/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/data_division_box"
 
         tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
 
+        self.logger.debug("分割処理スタート")
         with open(file_path, 'r', encoding='utf-8') as f:
             text = f.read()
 
