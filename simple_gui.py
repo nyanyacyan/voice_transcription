@@ -115,37 +115,49 @@ def youtube_process():
 def mp4_process():
     '''
     '''
-    mp4_path = mp4_path_entry.get()
-    mp4_to_mp3_inst = Mp4ToMp3(mp4_path)
-    audio_file = mp4_to_mp3_inst.mp4_to_mp3()
-    whisper_transcription_inst = WhisperTranscription(audio_file)
-    whisper_transcription_inst.whisper_transcription()
-    chatgpt_text_split_save_inst = ChatgptTextSplitSave()
-    chatgpt_text_split_save_inst.chatgpt_text_split_save()
+    input_dir = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/data_division_box'
+    output_dir = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/translate_after_box'
+    final_output_file = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/translated_completed.txt'
+    tranlate_instruction = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/翻訳指示ファイル.xlsx'
+    data_division_box = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/data_division_box'
+    translate_after_box = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/translate_after_box'
+    try:
+        mp4_path = mp4_path_entry.get()
+        mp4_to_mp3_inst = Mp4ToMp3(mp4_path)
+        audio_file = mp4_to_mp3_inst.mp4_to_mp3()
+        logger.debug("文字起こし開始")
+        whisper_transcription_inst = WhisperTranscription(audio_file)
+        whisper_transcription_inst.whisper_transcription()
+        chatgpt_text_split_save_inst = ChatgptTextSplitSave()
+        chatgpt_text_split_save_inst.chatgpt_text_split_save()
+        translation_req_class_inst = TranslationRequest(api_key=api_key)
+        translation_req_class_inst.translate_all_files(input_dir, output_dir, tranlate_instruction)
+        translation_req_class_inst.merge_translated_files(output_dir, final_output_file)
+        translation_req_class_inst.delete_text_files(data_division_box, translate_after_box)
+        messagebox.showinfo("完了通知", "翻訳が完了しました。\ntranslated_completed.txtをご覧ください。")
 
+    except TypeError as e:
+        print(f"TypeError: {e}")
+        error_message(f"テキストファイル生成ができてない可能性があります。{e}")
+
+    except Exception as e:
+        print(f"error: {e}")
+        error_message(f"処理中にエラーが発生しました。{e}")
+
+
+def mp3_process():
+    '''
+    '''
     input_dir = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/data_division_box'
     output_dir = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/translate_after_box'
     final_output_file = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/translated_completed.txt'
     tranlate_instruction = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/翻訳指示ファイル.xlsx'
 
-    translation_req_class_inst = TranslationRequest(api_key=api_key)
-    translation_req_class_inst.translate_all_files(input_dir, output_dir, tranlate_instruction)
-    translation_req_class_inst.merge_translated_files(output_dir, final_output_file)
-
-def mp3_process():
-    '''
-    '''
     audio_file = mp3_path_entry.get()
     whisper_transcription_inst = WhisperTranscription(audio_file)
     whisper_transcription_inst.whisper_transcription()
     chatgpt_text_split_save_inst = ChatgptTextSplitSave()
     chatgpt_text_split_save_inst.chatgpt_text_split_save()
-
-    input_dir = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/data_division_box'
-    output_dir = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/translate_after_box'
-    final_output_file = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/translated_completed.txt'
-    tranlate_instruction = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/翻訳指示ファイル.xlsx'
-
     translation_req_class_inst = TranslationRequest(api_key=api_key)
     translation_req_class_inst.translate_all_files(input_dir, output_dir, tranlate_instruction)
     translation_req_class_inst.merge_translated_files(output_dir, final_output_file)
