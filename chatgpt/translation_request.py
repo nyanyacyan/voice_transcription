@@ -107,7 +107,6 @@ class TranslationRequest:
 
     def merge_translated_files(self, output_dir, final_output_file):
         '''  テキストファイルにまとめる処理
-        
         ディレクトリにあるテキストファイルをリスト化してインデックスの順番に並び替え-> それを順番にテキストファイルにまとめていく
         output_dir-> output_dir-> translate_and_save_fileでの引数（翻訳が終わったテキストを格納するpath）そのため位置引数はtranslatorより前になる。
         translated_completed_file-> 最終のファイルパス（ファイル名）

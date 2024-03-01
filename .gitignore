@@ -1,3 +1,6 @@
+# 下記で指定しても消去できない場合は直接消す。
+# git rm --cached ファイル名
+
 # 機密情報
 .env
 
@@ -32,3 +35,6 @@ venv_shopers_scraping/
 
 # dataフォルダ
 *data*
+
+# コマンドファイル
+*.command
