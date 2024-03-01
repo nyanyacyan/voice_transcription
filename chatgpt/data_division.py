@@ -19,7 +19,7 @@ class ChatgptTextSplitSave:
         self.logger_instance = Logger(__name__, debug_mode=debug_mode)
         self.logger = self.logger_instance.get_logger()
         self.debug_mode = debug_mode
-        
+
 
     def chatgpt_text_split_save(self):
         file_path = "whisper_write_file.txt"
@@ -50,7 +50,7 @@ class ChatgptTextSplitSave:
                 blocks.append(block)
                 token_count = 0
                 block = ''
-            
+
             # トークンカウントを追加
             token_count += t
 

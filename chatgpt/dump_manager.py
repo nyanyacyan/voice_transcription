@@ -23,7 +23,7 @@ class DumpManager:
     '''  翻訳指示書を読込。全ての指示を１つに。
 
     translate_file-> 指示書をまとめたExcelファイル
-    
+
     '''
     def __init__(self, pickle_file='/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/data/excel_data.pickle'):
         '''
@@ -94,7 +94,7 @@ class DumpManager:
         pd.set_option('display.max_columns', None)
 
 
-        
+
         self.logger.debug(updated_data['instruction'])
 
         # 'wb'はバイナリ書込モード

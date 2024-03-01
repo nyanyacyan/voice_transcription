@@ -20,7 +20,7 @@ logs/
 
 # テキストデータ
 *.txt
-
+whisper_write_file.txt
 
 venv_shopers_scraping/
 

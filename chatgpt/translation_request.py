@@ -34,11 +34,11 @@ class TranslationRequest:
         self.chatgpt_translator_inst = ChatgptTranslator(api_key)
 
 
-    def translate_and_save_file(self, before_file, tranlate_instruction, output_dir):
+    def translate_and_save_file(self, before_file, translate_instruction, output_dir):
         ''' 処理のみ定義-> ファイルを読込-> 翻訳実行-> テキストファイルに書込
 
         file_path-> 分割された翻訳前のテキストファイル
-        tranlate_instruction-> 翻訳指示書（Excelファイル）
+        translate_instruction-> 翻訳指示書（Excelファイル）
         output_dir-> 翻訳が終わったテキストを格納するpath
         '''
 
@@ -48,7 +48,7 @@ class TranslationRequest:
         self.logger.debug(f"読込する分割されたファイル名: {base_name}")
 
         # 翻訳クラスの実行（実行時、API KEYが必要）
-        translated_text = self.chatgpt_translator_inst.chatgpt_translator(before_file, tranlate_instruction)
+        translated_text = self.chatgpt_translator_inst.chatgpt_translator(before_file, translate_instruction)
         self.logger.debug(f"受け取った翻訳内容: {translated_text}")
 
         # output_dir + base_name（元々のファイル名）することでパスにしてる
@@ -56,21 +56,21 @@ class TranslationRequest:
 
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(translated_text)
-        
+
         self.logger.debug(output_path)
         return output_path
 
         self.logger.debug("並行処理完了")
-    
 
 
 
-    def translate_all_files(self, input_dir, output_dir, tranlate_instruction):
+
+    def translate_all_files(self, input_dir, output_dir, translate_instruction):
         '''  ディレクトリ全てのテキストファイルを読込→ 並列処理を定義→ 
 
         input_dir = translate_and_save_fileでの引数 file_path -> 翻訳前の元データ
         output_dir-> translate_and_save_fileでの引数（翻訳が終わったテキストを格納するpath）そのため位置引数はtranslatorより前になる。
-        translator = translate_and_save_fileでの引数 tranlate_instruction -> 翻訳指示書（Excelファイル）
+        translator = translate_and_save_fileでの引数 translate_instruction -> 翻訳指示書（Excelファイル）
         '''
 
         # input_dir内の全てのテキストファイルのパスを検索してリストとして返す
@@ -83,7 +83,7 @@ class TranslationRequest:
         with concurrent.futures.ThreadPoolExecutor() as executor:
 
             # 各ファイルに対してtranslate_and_save_file関数を処理する→存在するファイル全てをexecutorによって並列処理する
-            futures = [executor.submit(self.translate_and_save_file, file, tranlate_instruction, output_dir) for file in files]
+            futures = [executor.submit(self.translate_and_save_file, file, translate_instruction, output_dir) for file in files]
 
             processed_count = 0
 
@@ -94,7 +94,7 @@ class TranslationRequest:
                     result = future.result()
                     if result or result.isspace() or len(result) < 30:
                         self.logger.error(f"ChatGPTのレスポンスが期待してるものを返してない可能性があります（明らかに文字数が少ない）")
-                        
+
                     else:
                         self.logger.debug("翻訳処理完了")
                         processed_count += 1

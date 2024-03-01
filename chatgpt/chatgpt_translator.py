@@ -41,17 +41,19 @@ class ChatgptTranslator:
 
 
     def pickle_read(self):
+        # バイナリモードでファイルを開く
         with open(self.pickle_path, 'rb') as handle:
             loaded_pickle_data = pickle.load(handle)
         self.logger.debug(loaded_pickle_data['instruction'])
         try:
+            # pickleファイルにあるデータのinstructionに分けられたものを\nで繋ぎ合わせる
+            # tolist()はデータをPythonの基本形式に戻す
             instructions = '\n'.join([''.join(x).strip() for x in loaded_pickle_data['instruction'].tolist()])
             self.logger.debug(f'instructions: {instructions}')
 
         except Exception as e:
             raise self.logger.error(f"Error: {e}")
 
-        
         return instructions
 
 
@@ -64,7 +66,7 @@ class ChatgptTranslator:
         '''
         self.logger.debug(f"before_text_file: {before_text_file}")
         self.logger.debug(f"full_instructions: {full_instructions}")
-        
+
         # メッセージ内容を構築
         messages  = [
             {"role": "system", "content": f'You are a helpful assistant that translates to Japanese.'},
@@ -88,7 +90,7 @@ class ChatgptTranslator:
         res = self.client.chat.completions.create(
             # モデルを選択
             model = "gpt-3.5-turbo-0125",
-            
+
             # メッセージ
             messages  = messages,
             max_tokens  = 4096,             # 生成する文章の最大単語数
@@ -107,11 +109,11 @@ class ChatgptTranslator:
 
         self.logger.debug(clean_text)
         return clean_text
-    
+
 
     # @debug_logger_decorator
     def chatgpt_translator(self, before_text_file, full_instructions):
-        '''  メインメソッド　クラスの全てを並べ当てはめる
+        '''  メインメソッド クラスの全てを並べ当てはめる
 
         before_text_file-> 分割された翻訳前のテキストファイル
         translate_file-> 翻訳指示書ファイル（Excelファイル）
