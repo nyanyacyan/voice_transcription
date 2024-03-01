@@ -25,7 +25,7 @@ class DumpManager:
     translate_file-> 指示書をまとめたExcelファイル
 
     '''
-    def __init__(self, pickle_file='/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/data/excel_data.pickle'):
+    def __init__(self, pickle_file='data/excel_data.pickle'):
         '''
         pickle_file-> pdにて保存して同じデータがないかを確認する場所
         '''

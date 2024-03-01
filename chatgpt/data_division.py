@@ -25,7 +25,7 @@ class ChatgptTextSplitSave:
         file_path = "whisper_write_file.txt"
         block_size = 2500  # このバーを超えたらテキストファイルを変える。少し余力を持ったものにする
         separat_part = '\n'
-        output_dir = "/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/data_division_box"
+        output_dir = "chatgpt/data_division_box"
 
         tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
 

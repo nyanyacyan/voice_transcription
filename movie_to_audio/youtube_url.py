@@ -15,8 +15,13 @@ from logger.debug_logger import Logger
 load_dotenv()
 
 class YoutubeToMp3:
-    def __init__(self,youtube_url):
+    def __init__(self,youtube_url, debug_mode=False):
         self.youtube_url = youtube_url
+        # Loggerクラスを初期化
+        debug_mode = os.getenv('DEBUG_MODE', 'False') == 'True'
+        self.logger_instance = Logger(__name__, debug_mode=debug_mode)
+        self.logger = self.logger_instance.get_logger()
+        self.debug_mode = debug_mode
 
 
     def youtube_to_mp3(self):
@@ -28,7 +33,7 @@ class YoutubeToMp3:
             'format': 'bestaudio/best',
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp4',  # mp4に入れ替えれば動画になる
+                'preferredcodec': 'mp3',  # mp4に入れ替えれば動画になる
                 'preferredquality': '192',
             }],
             # 保存先の指定、ファイルのタイトルと拡張子を入れるためのテンプレ
@@ -50,8 +55,8 @@ class YoutubeToMp3:
 
 
     def find_youtube_file_fullpath(self):
-        download_dir = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/downloads'
-        
+        download_dir = 'downloads'
+
         movie_title = self.youtube_to_mp3()
         self.logger.debug(movie_title)
 
@@ -62,7 +67,7 @@ class YoutubeToMp3:
         if matching_files:
             return matching_files[0]
         raise Exception("ファイルが見つかりません。")
-    
+
 
 
 class YoutubeToMp4:

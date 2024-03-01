@@ -48,12 +48,12 @@ def instructions_update_click():
 def youtube_process():
     '''
     '''
-    input_dir = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/data_division_box'
-    output_dir = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/translate_after_box'
-    final_output_file = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/translated_completed.txt'
-    translate_instruction = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/翻訳指示ファイル.xlsx'
-    data_division_box = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/data_division_box'
-    translate_after_box = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/translate_after_box'
+    input_dir = 'chatgpt/data_division_box'
+    output_dir = 'chatgpt/translate_after_box'
+    final_output_file = 'translated_completed.txt'
+    translate_instruction = '翻訳指示ファイル.xlsx'
+    data_division_box = 'chatgpt/data_division_box'
+    translate_after_box = 'chatgpt/translate_after_box'
 
     try:
         youtube_url = youtube_url_entry.get()
@@ -83,12 +83,12 @@ def youtube_process():
 def mp4_process():
     '''
     '''
-    input_dir = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/data_division_box'
-    output_dir = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/translate_after_box'
-    final_output_file = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/translated_completed.txt'
-    translate_instruction = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/翻訳指示ファイル.xlsx'
-    data_division_box = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/data_division_box'
-    translate_after_box = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/translate_after_box'
+    input_dir = 'chatgpt/data_division_box'
+    output_dir = 'chatgpt/translate_after_box'
+    final_output_file = 'translated_completed.txt'
+    translate_instruction = '翻訳指示ファイル.xlsx'
+    data_division_box = 'chatgpt/data_division_box'
+    translate_after_box = 'chatgpt/translate_after_box'
     try:
         mp4_path = mp4_path_entry.get()
         mp4_to_mp3_inst = Mp4ToMp3(mp4_path)
@@ -116,10 +116,10 @@ def mp4_process():
 def mp3_process():
     '''
     '''
-    input_dir = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/data_division_box'
-    output_dir = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/chatgpt/translate_after_box'
-    final_output_file = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/translated_completed.txt'
-    translate_instruction = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/翻訳指示ファイル.xlsx'
+    input_dir = 'chatgpt/data_division_box'
+    output_dir = 'chatgpt/translate_after_box'
+    final_output_file = 'translated_completed.txt'
+    translate_instruction = '翻訳指示ファイル.xlsx'
 
     try:
         audio_file = mp3_path_entry.get()

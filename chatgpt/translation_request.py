@@ -43,7 +43,7 @@ class TranslationRequest:
         '''
 
         # ファイル名を取得
-        self.logger.debug("並行処理スタート")
+        self.logger.debug("単品、並行処理スタート")
         base_name = os.path.basename(before_file)
         self.logger.debug(f"読込する分割されたファイル名: {base_name}")
 
@@ -58,15 +58,16 @@ class TranslationRequest:
             f.write(translated_text)
 
         self.logger.debug(output_path)
+        self.logger.debug("並行処理完了")
+
         return output_path
 
-        self.logger.debug("並行処理完了")
 
 
 
 
     def translate_all_files(self, input_dir, output_dir, translate_instruction):
-        '''  ディレクトリ全てのテキストファイルを読込→ 並列処理を定義→ 
+        '''  ディレクトリ全てのテキストファイルを読込→ 並列処理を定義→
 
         input_dir = translate_and_save_fileでの引数 file_path -> 翻訳前の元データ
         output_dir-> translate_and_save_fileでの引数（翻訳が終わったテキストを格納するpath）そのため位置引数はtranslatorより前になる。
@@ -77,6 +78,7 @@ class TranslationRequest:
         # os.path.joinによって特定のものを指定する
         # glob()によって一致した全てのファイルのフルパスをリストとして返す
         files = glob.glob(os.path.join(input_dir, '*.txt'))
+        self.logger.debug(f"files: {files}")
 
 
         # with concurrent.futures.ThreadPoolExecutor() as executor:によって並列処理の準備をする（ThreadPoolExecutorのインスタンス化）
@@ -89,10 +91,15 @@ class TranslationRequest:
 
             # concurrent.futures.as_completedにて完了通知をそれぞれの並列処理から受けることで、全ての処理が完了するのを待つ
             self.logger.debug("並行処理スタート")
-            for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures), ncols=100, desc="ChatGPTからの返答"):
+
+            try:
+                for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures), ncols=100, desc="ChatGPTからの返答"):
+
+                    self.logger.debug(future)
+
                 try:
                     result = future.result()
-                    if result or result.isspace() or len(result) < 5:
+                    if not result or result.isspace():
                         self.logger.error(f"ChatGPTのレスポンスが期待してるものを返してない可能性があります（明らかに文字数が少ない）")
 
                     else:
@@ -101,6 +108,9 @@ class TranslationRequest:
 
                 except Exception as e:
                     self.logger.error(f"翻訳処理中にエラーが発生しました: {e}")
+
+            except Exception as e:
+                self.logger.error(f"並行処理の監視中にエラーが発生しました: {e}")
 
 
 

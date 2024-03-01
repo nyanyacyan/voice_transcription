@@ -19,7 +19,7 @@ from my_decorators.logging_decorators import debug_logger_decorator
 load_dotenv()
 
 class ChatgptTranslator:
-    def __init__(self, api_key, pickle_path = '/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/data/excel_data.pickle', debug_mode=False):
+    def __init__(self, api_key, pickle_path = 'data/excel_data.pickle', debug_mode=False):
         self.api_key = api_key
         self.client = OpenAI(api_key=api_key)
         self.pickle_path = pickle_path
