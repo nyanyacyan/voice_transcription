@@ -92,7 +92,7 @@ class TranslationRequest:
             for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures), ncols=100, desc="ChatGPTからの返答"):
                 try:
                     result = future.result()
-                    if result or result.isspace() or len(result) < 30:
+                    if result or result.isspace() or len(result) < 5:
                         self.logger.error(f"ChatGPTのレスポンスが期待してるものを返してない可能性があります（明らかに文字数が少ない）")
 
                     else:

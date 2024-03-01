@@ -4,26 +4,20 @@
 #---バージョン---
 # Python==3.8.10
 # ----------------------------------------------------------------------------------
-import os,sys
+import os
+from tkinter import *
+from tkinter import filedialog, messagebox, ttk
+
 from dotenv import load_dotenv
 
-from tkinter import *
-from tkinter import ttk
-from tkinter import messagebox
-from tkinter import filedialog
-
 # 自作モジュール
-from movie_to_audio.youtube_url import YoutubeToMp3
-from movie_to_audio.movie_to_audio import Mp4ToMp3
-from mp3_dirlog_click import mp3_dirlog_click
-
-from whisper.transcribe import WhisperTranscription
 from chatgpt.data_division import ChatgptTextSplitSave
-from chatgpt.translation_request import TranslationRequest
 from chatgpt.dump_manager import DumpManager
-
+from chatgpt.translation_request import TranslationRequest
 from logger.debug_logger import Logger
-
+from movie_to_audio.movie_to_audio import Mp4ToMp3
+from movie_to_audio.youtube_url import YoutubeToMp3
+from whisper.transcribe import WhisperTranscription
 
 # Loggerクラスを初期化
 debug_mode = os.getenv('DEBUG_MODE', 'False') == 'True'
@@ -248,6 +242,25 @@ if __name__ == '__main__':
     mp3_path_entry = ttk.Entry(mp3_frame, textvariable=mp3_entry_var, width=25)
     mp3_path_entry.grid(row=2, column=1, padx=(10, 0))
 
+    def mp3_dirlog_click():
+        '''
+        pathを取得するだけ
+        '''
+        mp3_path = filedialog.askopenfilename(filetypes=[("MP3.files", "*.mp3")])
+
+        # もしmp3_pathがなかったらリターン（何もせず抜ける）を返す
+        if not mp3_path:
+            return
+
+        # .lower()-> 全てを小文字にする　mp3の部分を大文字が混ざってしまう可能性があるため
+        # .endswith('.mp3')-> 拡張子部分を取得して引数に指定されてるものになってるか確認
+        # もし拡張子がmp3でなかったらエラーメッセージを出す。
+        if not mp3_path.lower().endswith('.mp3'):
+            messagebox.showerror("エラー", "選択されたファイルが mp3 形式ではありません。")
+
+        else:
+            # 上記以外のものだったらパスを取得して反映
+            mp3_entry_var.set(mp3_path)  # StringVarオブジェクトにパスを設定
 
     # mp3ボタン作成
     mp3_button = ttk.Button(mp3_frame, text="選択", width=2.5, command=mp3_dirlog_click)
