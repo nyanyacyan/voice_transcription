@@ -34,7 +34,7 @@ class WhisperTranscription:
 
         # ここでモデルを調整する
         # tiny, base, small, medium, large-v2, large-v3
-        model = WhisperModel("base", device="cpu", compute_type="int8")
+        model = WhisperModel("large-v3", device="cpu", compute_type="int8")
 
         # データをsegmentsとinfoに分けて保管
         self.audio_file_path
@@ -65,6 +65,6 @@ class WhisperTranscription:
                 pbar.update(info.duration - timestamps)
 
         # # ファイル名を指定してテキストファイルに書き込む
-        with open('whisper_write_file.txt', 'w', encoding='utf-8') as output_file:
+        with open('results_text_box/whisper_write_file.txt', 'w', encoding='utf-8') as output_file:
             for segment in results:
                 output_file.write(f"{segment['start']} -> {segment['end']} {segment['text']})\n")

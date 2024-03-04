@@ -22,7 +22,7 @@ class ChatgptTextSplitSave:
 
 
     def chatgpt_text_split_save(self):
-        file_path = "whisper_write_file.txt"
+        file_path = "results_text_box/whisper_write_file.txt"
         block_size = 2500  # このバーを超えたらテキストファイルを変える。少し余力を持ったものにする
         separat_part = '\n'
         output_dir = "chatgpt/data_division_box"

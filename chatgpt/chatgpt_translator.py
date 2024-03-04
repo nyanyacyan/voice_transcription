@@ -83,7 +83,7 @@ class ChatgptTranslator:
         # リストはそのままでは書き込めないから分岐させる
         content_to_write = "\n".join(chatgpt_to_sentence)
 
-        with open('chatgpt_to_sentence.txt', 'w', encoding='utf-8') as f:
+        with open('results_text_box/chatgpt_to_sentence.txt', 'w', encoding='utf-8') as f:
             f.write(content_to_write)
 
         # OpenAI APIへのリクエスト送信

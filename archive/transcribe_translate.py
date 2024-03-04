@@ -33,7 +33,7 @@ class WhisperTranscription:
         )
 
         # # ファイル名を指定してテキストファイルに書き込む
-        with open('whisper_write_file.txt', 'w', encoding='utf-8') as output_file:
+        with open('results_text_box/whisper_write_file.txt', 'w', encoding='utf-8') as output_file:
             output_file.write("表示する言語 '%s' 精度 %f\n" % (info.language, info.language_probability))
 
             # セクションごとに時間を表示

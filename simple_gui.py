@@ -50,7 +50,7 @@ def youtube_process():
     '''
     input_dir = 'chatgpt/data_division_box'
     output_dir = 'chatgpt/translate_after_box'
-    final_output_file = 'translated_completed.txt'
+    final_output_file = 'results_text_box/translated_completed.txt'
     translate_instruction = '翻訳指示ファイル.xlsx'
     data_division_box = 'chatgpt/data_division_box'
     translate_after_box = 'chatgpt/translate_after_box'
