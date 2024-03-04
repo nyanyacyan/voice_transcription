@@ -38,3 +38,6 @@ venv_shopers_scraping/
 
 # コマンドファイル
 *.command
+
+# Pythonファイル
+*.pkg
