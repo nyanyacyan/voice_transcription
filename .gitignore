@@ -41,3 +41,6 @@ venv_shopers_scraping/
 
 # Pythonファイル
 *.pkg
+
+# exeファイル
+*.exe

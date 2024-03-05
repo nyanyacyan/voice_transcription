@@ -20,6 +20,34 @@ class ChatgptTextSplitSave:
         self.logger = self.logger_instance.get_logger()
         self.debug_mode = debug_mode
 
+    def token_count(self):
+        '''  トークンをカウントすることだけに作成された関数
+
+        命令部分のみ800トークン
+        １つの翻訳指示で70トークン
+        送信トークンの上限は16,384トークン（約12,500字）
+        ChatGPTからのレスポンスの最大トークン数は4000（テキスト部分の最大値→日本語だと3000）
+        リクエスト最大値（15000）- 命令文のみ（800）- 翻訳テキスト（2500）
+        '''
+        tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+        before_file_path = "results_text_box/whisper_write_file.txt"
+        sentence_file_path = "results_text_box/chatgpt_to_sentence.txt"
+
+        self.logger.debug("総トークン数カウント")
+        with open(before_file_path, 'r', encoding='utf-8') as f:
+            text = f.read()
+
+        before_full_token = len(tokenizer.encode(text))
+
+        print(f"full_token_count: {before_full_token}")
+
+        self.logger.debug("命令文、総トークン数")
+        with open(sentence_file_path, 'r', encoding='utf-8') as f:
+            text = f.read()
+
+        sentence_full_token = len(tokenizer.encode(text))
+        print(f"sentence_full_token: {sentence_full_token}")
+
 
     def chatgpt_text_split_save(self):
         file_path = "results_text_box/whisper_write_file.txt"
