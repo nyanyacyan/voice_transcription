@@ -25,7 +25,6 @@ logs/
 *.txt
 whisper_write_file.txt
 
-venv_shopers_scraping/
 
 # テストファイルを無視する。
 *test*
@@ -48,3 +47,27 @@ venv_shopers_scraping/
 
 # batふぁいる
 *.bat
+
+# 画像ファイル
+.webp
+商品 テスト画像.webp
+
+# 仮想環境
+venv/
+
+
+# 仮想環境を直接指定
+venv_gamesite_auto_up/
+venv_voice_transcription/
+venv_shopers_scraping/
+
+# pickleデータ
+*.pkl
+*_cookie.pkl
+
+# デバッグ用のスクショフォルダ
+DebugScreenshot/
+
+# pycache
+__pycache__/
+*.pyc
