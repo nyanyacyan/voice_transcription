@@ -8,7 +8,6 @@
 import os
 import asyncio
 from dotenv import load_dotenv
-from tqdm import tqdm
 from faster_whisper import WhisperModel
 
 load_dotenv()
@@ -66,7 +65,9 @@ class WhisperTranscription:
 
 
 # ----------------------------------------------------------------------------------
-# 同期処理のメリットを活かすため
+# 同期処理のメリットを活かすため同期処理で記述
+# 同期処理は非同期処理の下にまとめることによってわかりやすくなる
+#! 非同期処理に同期処理をまとめるのは基本「I/O処理」に限る
 
     def write_to_file(self, filepath, content):
         with open(filepath, 'w', encoding='utf-8') as output_file:
