@@ -6,6 +6,7 @@
 #! 非同期処理
 # --------------------------------------------------------------------------------
 import os
+import asyncio
 
 from dotenv import load_dotenv
 from moviepy.editor import AudioFileClip
@@ -26,7 +27,7 @@ class Mp4ToMp3:
         self.debug_mode = debug_mode
 
 
-    def mp4_to_mp3(self):
+    async def mp4_to_mp3(self):
         mp4_file = self.mp4_path
         download_directory = "downloads"
 
@@ -40,7 +41,11 @@ class Mp4ToMp3:
         full_mp3_path = os.path.join(download_directory, new_mp3_filename)
 
         mp3_file = AudioFileClip(mp4_file)
+
         # 音声データを保存
-        mp3_file.write_audiofile(full_mp3_path)
+        # コルーチン化（非同期処理）
+        # run_in_executorの第一引数にNoneを指定するとデフォルトのThreadPoolExecutorを使用
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(None, mp3_file.write_audiofile, full_mp3_path)
 
         return full_mp3_path

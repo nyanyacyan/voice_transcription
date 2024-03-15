@@ -4,9 +4,10 @@
 
 #! 非同期処理
 # --------------------------------------------------------------------------------
-import os,glob
+import os, glob, asyncio
 from dotenv import load_dotenv
 from yt_dlp import YoutubeDL
+from concurrent.futures import ProcessPoolExecutor
 
 # 自作モジュール
 from logger.debug_logger import Logger
@@ -23,7 +24,7 @@ class YoutubeToMp3:
         self.debug_mode = debug_mode
 
 
-    def youtube_to_mp3(self):
+    async def youtube_to_mp3(self):
         # ダウンロードするディレクトリを指定
         download_directory = "downloads"
 
@@ -45,7 +46,8 @@ class YoutubeToMp3:
 
         # 実際にYoutubeDLクラスを使って上記で指定したオプションを使ってオブジェクトにしてるイメージ
         with YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(self.youtube_url, download=True)
+            loop = asyncio.get_running_loop()
+            info_dict = await loop.run_in_executor(None, ydl.extract_info(self.youtube_url, download=True))
             movie_title = info_dict.get('title', 'downloaded_file')
             self.logger.debug(f"ダウンロードファイル名: {movie_title}")
             return movie_title
@@ -53,15 +55,18 @@ class YoutubeToMp3:
 
 
 
-    def find_youtube_file_fullpath(self):
+    async def find_youtube_file_fullpath(self):
         download_dir = 'downloads'
 
-        movie_title = self.youtube_to_mp3()
+        movie_title = await self.youtube_to_mp3()
         self.logger.debug(movie_title)
 
+        # Pathを生成
         search_pattern = os.path.join(download_dir, f'*{movie_title}*.*')
 
-        matching_files = glob.glob(search_pattern)
+        loop = asyncio.get_running_loop()
+        # 「指定されたタイトル」を含むファイルを、PC内から探す（探す→glob）
+        matching_files = await loop.run_in_executor(None, lambda: glob.glob(search_pattern))
 
         if matching_files:
             return matching_files[0]
