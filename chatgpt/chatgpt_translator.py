@@ -3,14 +3,12 @@
 # chatgpt翻訳リクエストクラス
 # 2023/2/18 制作
 
-#---バージョン---
-# Python==3.8.10
+#! 非同期処理
 # ----------------------------------------------------------------------------------
 from openai import OpenAI
 import os
 import pickle
 from dotenv import load_dotenv
-import pandas as pd
 
 # 自作モジュール
 from logger.debug_logger import Logger

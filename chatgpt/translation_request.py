@@ -1,15 +1,12 @@
 # coding: utf-8
 # ----------------------------------------------------------------------------------
-# loggerクラス
+# ChatGPTへの命令を並列処理してるクラス
 # 2023/2/23 制作
 
-#---バージョン---
-# Python==3.8.10
-# chatgptクラスの並行処理の実施-> 翻訳した後のディレクトリにテキスト保存-> 一つにまとめる
+#! 非同期処理
 # ----------------------------------------------------------------------------------
 import os
 import glob
-import re
 from dotenv import load_dotenv
 import concurrent.futures
 from tqdm import tqdm

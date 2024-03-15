@@ -3,12 +3,10 @@
 # mp４ から wavに変換するモジュール
 # 2023/2/18 制作
 
-#---バージョン---
-# Python==3.8.10
-
+#! 非同期処理
 # --------------------------------------------------------------------------------
-import os,glob
-import ffmpeg
+import os
+
 from dotenv import load_dotenv
 from moviepy.editor import AudioFileClip
 

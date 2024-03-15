@@ -3,11 +3,7 @@
 # dumpクラス
 # 2023/2/24 制作
 
-#---バージョン---
-# Python==3.8.10
-
-# ---流れ---
-# GUIで「辞書の更新」をクリック-> 始動-> 更新
+#* 同期処理
 # ----------------------------------------------------------------------------------
 import os
 from dotenv import load_dotenv
@@ -92,8 +88,6 @@ class DumpManager:
         updated_data.reset_index(drop=True, inplace=True)
 
         pd.set_option('display.max_columns', None)
-
-
 
         self.logger.debug(updated_data['instruction'])
 
