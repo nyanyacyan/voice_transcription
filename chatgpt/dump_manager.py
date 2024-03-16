@@ -3,7 +3,7 @@
 # dumpクラス
 # 2023/2/24 制作
 
-#* 同期処理
+#* 同期処理のまま → バイナリデータのため読み書きが非常に早いため非同期処理の必要なし。
 # ----------------------------------------------------------------------------------
 import os
 from dotenv import load_dotenv
@@ -14,6 +14,10 @@ from logger.debug_logger import Logger
 from my_decorators.logging_decorators import debug_logger_decorator
 
 load_dotenv()
+
+
+# ----------------------------------------------------------------------------------
+
 
 class DumpManager:
     '''  翻訳指示書を読込。全ての指示を１つに。
@@ -34,6 +38,9 @@ class DumpManager:
         self.debug_mode = debug_mode
 
 
+# ----------------------------------------------------------------------------------
+
+
     def find_pickle_file(self):
         try:
             with open(self.pickle_file, 'rb') as handle:
@@ -48,6 +55,9 @@ class DumpManager:
             self.logger.debug("ファイルが空。新しいデータフレーム作成開始")
             existing_data = pd.DataFrame(columns=['from', 'to', 'instruction'])
             return existing_data
+
+
+# ----------------------------------------------------------------------------------
 
 
     def dataframe_updated(self, translate_file):
@@ -82,6 +92,9 @@ class DumpManager:
         return updated_data
 
 
+# ----------------------------------------------------------------------------------
+
+
     def write_pickle_file(self, translate_file):
         updated_data = self.dataframe_updated(translate_file)
 
@@ -95,3 +108,6 @@ class DumpManager:
         # もしpickle_fileがなければ新規作成
         with open(self.pickle_file, 'wb') as handle:
             pickle.dump(updated_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+# ----------------------------------------------------------------------------------
