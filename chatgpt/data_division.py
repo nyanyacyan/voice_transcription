@@ -5,11 +5,15 @@
 
 #! 非同期処理
 # ----------------------------------------------------------------------------------
-import os
+import os, asyncio
 from transformers import GPT2Tokenizer
 
 # 自作モジュール
 from logger.debug_logger import Logger
+
+
+# ----------------------------------------------------------------------------------
+
 
 class ChatgptTextSplitSave:
     def __init__(self, debug_mode=False):
@@ -19,9 +23,12 @@ class ChatgptTextSplitSave:
         self.logger = self.logger_instance.get_logger()
         self.debug_mode = debug_mode
 
-    def token_count(self):
-        '''  トークンをカウントすることだけに作成された関数
 
+# ----------------------------------------------------------------------------------
+# トークンをカウントすることだけに作成された関数
+
+    def token_count(self):
+        '''
         命令部分のみ800トークン
         １つの翻訳指示で70トークン
         送信トークンの上限は16,384トークン（約12,500字）
@@ -48,7 +55,10 @@ class ChatgptTextSplitSave:
         print(f"sentence_full_token: {sentence_full_token}")
 
 
-    def chatgpt_text_split_save(self):
+# ----------------------------------------------------------------------------------
+# 非同期処理で書き込み
+
+    async def chatgpt_text_split_save(self):
         file_path = "results_text_box/whisper_write_file.txt"
         block_size = 2500  # このバーを超えたらテキストファイルを変える。少し余力を持ったものにする
         separat_part = '\n'
@@ -57,8 +67,11 @@ class ChatgptTextSplitSave:
         tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
 
         self.logger.debug("分割処理スタート")
-        with open(file_path, 'r', encoding='utf-8') as f:
-            text = f.read()
+
+        loop = asyncio.get_running_loop()
+
+        # 非同期処理で書き込み（書き込み部分は同期処理）
+        text = await loop.run_in_executor(None, self.read_file, file_path)
 
         # 一つ一つを区切ってるパーツによって分解
         lines = text.split(separat_part)
@@ -94,7 +107,29 @@ class ChatgptTextSplitSave:
 
             for i, block in enumerate(blocks):
                 output_text = os.path.join(output_dir, f'{i+1}_text_block.txt')
-                with open(output_text, 'w', encoding='utf-8') as output_file:
-                    output_file.write(block)
 
+                # 非同期処理で書き込み（書き込み部分は同期処理）
+                await loop.run_in_executor(None, self.write_to_file, output_text, block)
                 self.logger.debug(f"{output_text} 保存完了")
+
+
+# ----------------------------------------------------------------------------------
+# 同期処理のメリットを活かすため同期処理で記述
+# 同期処理は非同期処理の下にまとめることによってわかりやすくなる
+#! 非同期処理に同期処理をまとめるのは基本「I/O処理」に限る
+
+    def read_file(self, file_path):
+        with open(file_path, 'r', encoding='utf-8') as f:
+            return f.read()
+
+
+# ----------------------------------------------------------------------------------
+# 同期処理のメリットを活かすため同期処理で記述
+# 同期処理は非同期処理の下にまとめることによってわかりやすくなる
+#! 非同期処理に同期処理をまとめるのは基本「I/O処理」に限る
+
+    def write_to_file(self, filepath, content):
+        with open(filepath, 'w', encoding='utf-8') as output_file:
+            output_file.write(content)
+
+# ----------------------------------------------------------------------------------
