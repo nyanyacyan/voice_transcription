@@ -71,3 +71,6 @@ DebugScreenshot/
 # pycache
 __pycache__/
 *.pyc
+
+# __init__.py
+__init__.py
