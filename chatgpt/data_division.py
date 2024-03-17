@@ -105,6 +105,7 @@ class ChatgptTextSplitSave:
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
 
+            # 頭に数字をいれることでソートができるようにしてる
             for i, block in enumerate(blocks):
                 output_text = os.path.join(output_dir, f'{i+1}_text_block.txt')
 

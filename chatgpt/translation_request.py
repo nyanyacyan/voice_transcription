@@ -7,6 +7,9 @@
 # ----------------------------------------------------------------------------------
 import os
 import glob
+import asyncio
+import aiohttp
+import aiofiles
 from dotenv import load_dotenv
 import concurrent.futures
 from tqdm import tqdm
@@ -20,6 +23,9 @@ from chatgpt.chatgpt_translator import ChatgptTranslator
 load_dotenv()
 
 
+# ----------------------------------------------------------------------------------
+
+
 class TranslationRequest:
     def __init__(self, api_key, debug_mode=False):
         # Loggerクラスを初期化
@@ -31,9 +37,11 @@ class TranslationRequest:
         self.chatgpt_translator_inst = ChatgptTranslator(api_key)
 
 
-    def translate_and_save_file(self, before_file, translate_instruction, output_dir):
-        ''' 処理のみ定義-> ファイルを読込-> 翻訳実行-> テキストファイルに書込
+# ----------------------------------------------------------------------------------
+# 処理のみ定義-> ファイルを読込-> 翻訳実行-> テキストファイルに書込
 
+    async def translate_and_save_file_async(self, before_file, translate_instruction, output_dir):
+        '''
         file_path-> 分割された翻訳前のテキストファイル
         translate_instruction-> 翻訳指示書（Excelファイル）
         output_dir-> 翻訳が終わったテキストを格納するpath
@@ -45,14 +53,14 @@ class TranslationRequest:
         self.logger.debug(f"読込する分割されたファイル名: {base_name}")
 
         # 翻訳クラスの実行（実行時、API KEYが必要）
-        translated_text = self.chatgpt_translator_inst.chatgpt_translator(before_file, translate_instruction)
+        translated_text = await self.chatgpt_translator_inst.chatgpt_translator(before_file, translate_instruction)
         self.logger.debug(f"受け取った翻訳内容: {translated_text}")
 
         # output_dir + base_name（元々のファイル名）することでパスにしてる
         output_path = os.path.join(output_dir, base_name)
 
-        with open(output_path, 'w', encoding='utf-8') as f:
-            f.write(translated_text)
+        async with aiofiles.open(output_path, 'w', encoding='utf-8') as f:
+            await f.write(translated_text)
 
         self.logger.debug(output_path)
         self.logger.debug("並行処理完了")
@@ -60,11 +68,12 @@ class TranslationRequest:
         return output_path
 
 
+# ----------------------------------------------------------------------------------
+# ディレクトリ全てのテキストファイルを読込→並列処理を実施
+# 各処理が終わるまで待機
 
-
-
-    def translate_all_files(self, input_dir, output_dir, translate_instruction):
-        '''  ディレクトリ全てのテキストファイルを読込→ 並列処理を定義→
+    async def translate_all_files(self, input_dir, output_dir, translate_instruction):
+        '''  →
 
         input_dir = translate_and_save_fileでの引数 file_path -> 翻訳前の元データ
         output_dir-> translate_and_save_fileでの引数（翻訳が終わったテキストを格納するpath）そのため位置引数はtranslatorより前になる。
@@ -77,44 +86,48 @@ class TranslationRequest:
         files = glob.glob(os.path.join(input_dir, '*.txt'))
         self.logger.debug(f"files: {files}")
 
+        tasks = [self.translate_and_save_file_async(file, translate_instruction, output_dir) for file in files]
 
-        # with concurrent.futures.ThreadPoolExecutor() as executor:によって並列処理の準備をする（ThreadPoolExecutorのインスタンス化）
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-
-            # 各ファイルに対してtranslate_and_save_file関数を処理する→存在するファイル全てをexecutorによって並列処理する
-            futures = [executor.submit(self.translate_and_save_file, file, translate_instruction, output_dir) for file in files]
-
-            processed_count = 0
-
-            # concurrent.futures.as_completedにて完了通知をそれぞれの並列処理から受けることで、全ての処理が完了するのを待つ
-            self.logger.debug("並行処理スタート")
-
-            try:
-                for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures), ncols=100, desc="ChatGPTからの返答"):
-
-                    self.logger.debug(future)
-
-                try:
-                    result = future.result()
-                    if not result or result.isspace():
-                        self.logger.error(f"ChatGPTのレスポンスが期待してるものを返してない可能性があります（明らかに文字数が少ない）")
-
-                    else:
-                        self.logger.debug("翻訳処理完了")
-                        processed_count += 1
-
-                except Exception as e:
-                    self.logger.error(f"翻訳処理中にエラーが発生しました: {e}")
-
-            except Exception as e:
-                self.logger.error(f"並行処理の監視中にエラーが発生しました: {e}")
+        await asyncio.gather(*tasks)
 
 
+        # # with concurrent.futures.ThreadPoolExecutor() as executor:によって並列処理の準備をする（ThreadPoolExecutorのインスタンス化）
+        # with concurrent.futures.ThreadPoolExecutor() as executor:
+
+        #     # 各ファイルに対してtranslate_and_save_file関数を処理する→存在するファイル全てをexecutorによって並列処理する
+        #     futures = [executor.submit(self.translate_and_save_file, file, translate_instruction, output_dir) for file in files]
+
+        #     processed_count = 0
+
+        #     # concurrent.futures.as_completedにて完了通知をそれぞれの並列処理から受けることで、全ての処理が完了するのを待つ
+        #     self.logger.debug("並行処理スタート")
+
+        #     try:
+        #         for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures), ncols=100, desc="ChatGPTからの返答"):
+
+        #             self.logger.debug(future)
+
+        #         try:
+        #             result = future.result()
+        #             if not result or result.isspace():
+        #                 self.logger.error(f"ChatGPTのレスポンスが期待してるものを返してない可能性があります（明らかに文字数が少ない）")
+
+        #             else:
+        #                 self.logger.debug("翻訳処理完了")
+        #                 processed_count += 1
+
+        #         except Exception as e:
+        #             self.logger.error(f"翻訳処理中にエラーが発生しました: {e}")
+
+        #     except Exception as e:
+        #         self.logger.error(f"並行処理の監視中にエラーが発生しました: {e}")
 
 
-    def merge_translated_files(self, output_dir, final_output_file):
-        '''  テキストファイルにまとめる処理
-        ディレクトリにあるテキストファイルをリスト化してインデックスの順番に並び替え-> それを順番にテキストファイルにまとめていく
+# ----------------------------------------------------------------------------------
+# 各テキストを順番に並び替え→一つのテキストファイルに纏める
+
+    async def merge_translated_files(self, output_dir, final_output_file):
+        '''
         output_dir-> output_dir-> translate_and_save_fileでの引数（翻訳が終わったテキストを格納するpath）そのため位置引数はtranslatorより前になる。
         translated_completed_file-> 最終のファイルパス（ファイル名）
         '''
@@ -128,17 +141,23 @@ class TranslationRequest:
 
         # final_output_fileに最後、書き込む
         # final_output_fileは最後にファイル名を指定する
-        with open(final_output_file, 'w', encoding='utf-8') as output_file:
+        async with aiofiles.open(final_output_file, 'w', encoding='utf-8') as output_file:
 
             # ソートされたテキストファイルのリストを一つ一つ読み込んで順番に入れ込んでいく。
             for file in files:
 
                 # 各テキストファイルを読み取る。
-                with open(file, 'r', encoding='utf-8') as infile:
+                async with aiofiles. open(file, 'r', encoding='utf-8') as infile:
+
+                    # 読み込み部分を非同期化するために別定義
+                    content = await infile.read()
 
                     # 読み込んだ内容を書き込んで最後に改行を入れる
-                    output_file.write(infile.read() + '\n')
+                    await output_file.write(content + '\n')
 
+
+# ----------------------------------------------------------------------------------
+# 分割されたファイルを消す
 
     def delete_text_files(self, data_division_box, translate_after_box):
         division_text_files = glob.glob(os.path.join(data_division_box, '*.txt'))
@@ -165,3 +184,5 @@ class TranslationRequest:
                 except Exception as e:
                     self.logger.error(f"{file_path} の削除中にエラーが発生しました: {e}")
 
+
+# ----------------------------------------------------------------------------------
