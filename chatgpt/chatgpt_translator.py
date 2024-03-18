@@ -10,6 +10,9 @@ import os
 import pickle
 import aiohttp
 import aiofiles
+import json
+import ssl
+import certifi
 from dotenv import load_dotenv
 
 # 自作モジュール
@@ -105,44 +108,57 @@ class ChatgptTranslator:
         # この３つがあってリクエストになる
 
         # エンドポイント→集合場所
-        url = "https://api.openai.com/v1/completions"
+        url = "https://api.openai.com/v1/chat/completions"
 
         # 認証情報
         headers = {
-            "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
         }
 
         # リクエスト情報
-        data = {
-            "model": "text-davinci-003",
-            "prompt": messages,
+        payload = {
+            "model": "gpt-3.5-turbo-0125",
+            "messages": messages,
             "max_tokens": 4096,
         }
-
 
         # リクエストを非同期処理する場合には簡素化されたもの（self.client.chat.completions.create()メソッド）では×
         # 正規のリクエスト方法により実行する必要がある
         # aiohttp.ClientSession() as session:はライブラリのインスタンスされたもの
         # 非同期でHTTPセッションを開始し、そのセッションを通じて様々なHTTPリクエスト（GET、POST、PUTなど）を非同期に実行
-
-        # セッションはリクエストの送信準備と、コネクションの管理
         async with aiohttp.ClientSession() as session:
 
             # session.post()メソッドは、特にHTTP POSTリクエストを非同期に送信する際に利用
-            async with session.post(url, json=data, headers=headers) as response:
+            async with session.post(
+                url,
+                headers=headers,
+                json=payload,
+                ssl=ssl.create_default_context(cafile=certifi.where())
+            ) as response:
+                    print(response.headers)
+                    print(response.status)
+                    response_text = await response.text()  # JSON解析前の生のレスポンスボディ
+                    print(response_text)
+
+                    if response.status == 200:
 
                 # 実行部分は"await"
                 # .json()によってリクエストしたデータをjsonで返してくれる→レスポンスは基本バイナリデータ
-                response_data = await response.json()
-                translate_text = response_data.get("choices")[0].get("text","")
+                        response_data = await response.json()
+                        translate_text = response_data.get("choices")[0].get("text","")
 
-                self.logger.debug(translate_text)
+                        self.logger.debug(translate_text)
 
-                clean_text = translate_text.replace(')', '').replace('\n\n', '\n')
+                        clean_text = translate_text.replace(')', '').replace('\n\n', '\n')
 
-                self.logger.debug(clean_text)
-                return clean_text
+                        self.logger.debug(clean_text)
+                        return clean_text
+
+                    else:
+                        self.logger.error(f"Request failed with status {response.status}")
+                        # 必要であれば、response.statusに応じたエラーハンドリングをここに追加
+                        return None
 
 
         # # OpenAI APIへのリクエスト送信
@@ -181,12 +197,15 @@ class ChatgptTranslator:
         '''
         self.logger.debug("翻訳処理開始")
         before_text_file = self.text_read(before_text_file)
-        self.logger.debug("pickleファイルの読み込み開始")
+        self.logger.debug("pickleファイルの読み込み 開始")
         full_instructions = self.pickle_read()
-        self.logger.debug(full_instructions)
+        self.logger.debug(f"pickle_file: {full_instructions}")
+        self.logger.debug("pickleファイルの読み込み 完了")
 
         # 非同期処理した部分のみ非同期実行
+        self.logger.debug("ChatGPTへ翻訳指示をリクエスト 開始")
         translated_text = await self.chatgpt_request(before_text_file, full_instructions)
+        self.logger.debug("ChatGPTへ翻訳指示をリクエスト 終了")
 
         return translated_text
 

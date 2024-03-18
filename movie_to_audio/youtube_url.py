@@ -24,7 +24,7 @@ class YoutubeToMp3:
         self.debug_mode = debug_mode
 
 
-    async def youtube_to_mp3(self):
+    def youtube_to_mp3(self):
         # ダウンロードするディレクトリを指定
         download_directory = "downloads"
 
@@ -46,9 +46,17 @@ class YoutubeToMp3:
 
         # 実際にYoutubeDLクラスを使って上記で指定したオプションを使ってオブジェクトにしてるイメージ
         with YoutubeDL(ydl_opts) as ydl:
-            loop = asyncio.get_running_loop()
-            info_dict = await loop.run_in_executor(None, ydl.extract_info(self.youtube_url, download=True))
+            self.logger.debug("処理を開始")
+            # loop = asyncio.get_running_loop()
+            info_dict = ydl.extract_info(self.youtube_url, download=True)
+            if info_dict is not None and isinstance(info_dict, dict):
+                movie_title = info_dict.get('title', 'downloaded_file')
+            else:
+                # 適切なエラーハンドリングをここに書く
+                self.logger.error("info_dict is not a dictionary or is None.")
+
             movie_title = info_dict.get('title', 'downloaded_file')
+            self.logger.debug("info_dict.get 処理を開始")
             self.logger.debug(f"ダウンロードファイル名: {movie_title}")
             return movie_title
 
@@ -58,7 +66,7 @@ class YoutubeToMp3:
     async def find_youtube_file_fullpath(self):
         download_dir = 'downloads'
 
-        movie_title = await self.youtube_to_mp3()
+        movie_title = self.youtube_to_mp3()
         self.logger.debug(movie_title)
 
         # Pathを生成

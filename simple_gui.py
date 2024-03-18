@@ -4,6 +4,8 @@
 #! 非同期処理
 # ----------------------------------------------------------------------------------
 import os
+import asyncio
+import threading
 from tkinter import *
 from tkinter import filedialog, messagebox, ttk
 
@@ -44,7 +46,7 @@ def instructions_update_click():
     messagebox.showinfo("更新完了", "更新が完了しました。")
 
 
-def youtube_process():
+async def youtube_process():
     '''
     '''
     input_dir = 'chatgpt/data_division_box'
@@ -57,15 +59,15 @@ def youtube_process():
     try:
         youtube_url = youtube_url_entry.get()
         youtube_to_mp3_inst = YoutubeToMp3(youtube_url)
-        audio_file = youtube_to_mp3_inst.find_youtube_file_fullpath()
+        audio_file = await youtube_to_mp3_inst.find_youtube_file_fullpath()
         logger.debug("文字起こし開始")
         whisper_transcription_inst = WhisperTranscription(audio_file)
-        whisper_transcription_inst.whisper_transcription()
+        await whisper_transcription_inst.whisper_transcription()
         chatgpt_text_split_save_inst = ChatgptTextSplitSave()
-        chatgpt_text_split_save_inst.chatgpt_text_split_save()
+        await chatgpt_text_split_save_inst.chatgpt_text_split_save()
         translation_req_class_inst = TranslationRequest(api_key=api_key)
-        translation_req_class_inst.translate_all_files(input_dir, output_dir, translate_instruction)
-        translation_req_class_inst.merge_translated_files(output_dir, final_output_file)
+        await translation_req_class_inst.translate_all_files(input_dir, output_dir, translate_instruction)
+        await translation_req_class_inst.merge_translated_files(output_dir, final_output_file)
         translation_req_class_inst.delete_text_files(data_division_box, translate_after_box)
         messagebox.showinfo("完了通知", "翻訳が完了しました。\ntranslated_completed.txtをご覧ください。")
 
@@ -79,9 +81,7 @@ def youtube_process():
 
 
 
-def mp4_process():
-    '''
-    '''
+async def mp4_process():
     input_dir = 'chatgpt/data_division_box'
     output_dir = 'chatgpt/translate_after_box'
     final_output_file = 'translated_completed.txt'
@@ -91,15 +91,16 @@ def mp4_process():
     try:
         mp4_path = mp4_path_entry.get()
         mp4_to_mp3_inst = Mp4ToMp3(mp4_path)
-        audio_file = mp4_to_mp3_inst.mp4_to_mp3()
+        audio_file = await mp4_to_mp3_inst.mp4_to_mp3()
+        logger.debug(audio_file)
         logger.debug("文字起こし開始")
         whisper_transcription_inst = WhisperTranscription(audio_file)
-        whisper_transcription_inst.whisper_transcription()
+        await whisper_transcription_inst.whisper_transcription()
         chatgpt_text_split_save_inst = ChatgptTextSplitSave()
-        chatgpt_text_split_save_inst.chatgpt_text_split_save()
+        await chatgpt_text_split_save_inst.chatgpt_text_split_save()
         translation_req_class_inst = TranslationRequest(api_key=api_key)
-        translation_req_class_inst.translate_all_files(input_dir, output_dir, translate_instruction)
-        translation_req_class_inst.merge_translated_files(output_dir, final_output_file)
+        await translation_req_class_inst.translate_all_files(input_dir, output_dir, translate_instruction)
+        await translation_req_class_inst.merge_translated_files(output_dir, final_output_file)
         translation_req_class_inst.delete_text_files(data_division_box, translate_after_box)
         messagebox.showinfo("完了通知", "翻訳が完了しました。\ntranslated_completed.txtをご覧ください。")
 
@@ -112,7 +113,7 @@ def mp4_process():
         error_message(f"処理中にエラーが発生しました。{e}")
 
 
-def mp3_process():
+async def mp3_process():
     '''
     '''
     input_dir = 'chatgpt/data_division_box'
@@ -123,12 +124,12 @@ def mp3_process():
     try:
         audio_file = mp3_path_entry.get()
         whisper_transcription_inst = WhisperTranscription(audio_file)
-        whisper_transcription_inst.whisper_transcription()
+        await whisper_transcription_inst.whisper_transcription()
         chatgpt_text_split_save_inst = ChatgptTextSplitSave()
-        chatgpt_text_split_save_inst.chatgpt_text_split_save()
+        await chatgpt_text_split_save_inst.chatgpt_text_split_save()
         translation_req_class_inst = TranslationRequest(api_key=api_key)
-        translation_req_class_inst.translate_all_files(input_dir, output_dir, translate_instruction)
-        translation_req_class_inst.merge_translated_files(output_dir, final_output_file)
+        await translation_req_class_inst.translate_all_files(input_dir, output_dir, translate_instruction)
+        await translation_req_class_inst.merge_translated_files(output_dir, final_output_file)
         messagebox.showinfo("完了通知", "翻訳が完了しました。\ntranslated_completed.txtをご覧ください。")
 
     except TypeError as e:
@@ -140,7 +141,7 @@ def mp3_process():
         error_message(f"処理中にエラーが発生しました。{e}")
 
 
-def submit_click():
+async def submit_click():
     youtube_url = youtube_url_entry.get()
     mp3_path = mp3_path_entry.get()
     mp4_path = mp4_path_entry.get()
@@ -151,12 +152,30 @@ def submit_click():
         messagebox.showerror("エラー", "YouTubeのURL、mp4、mp3のいずれかの入力（選択）がされてません。")
 
     if youtube_url:
-        youtube_process()
+        await youtube_process()
     if mp4_path:
-        mp4_process()
+        await mp4_process()
     if mp3_path:
-        mp3_process()
+        await mp3_process()
 
+
+# Tkinter内で非同期処理を実行するための関数
+def run_async_task():
+    # 新しいイベントループ（司令塔）を作成→非同期タスクを実行する準備
+    loop = asyncio.new_event_loop()
+
+    # このイベントループを使って、非同期タスクを管理するように指示を出してる。
+    asyncio.set_event_loop(loop)
+
+    # submit_clickをeventループに追加それが完了するまで実行
+    loop.run_until_complete(submit_click())
+
+# 新しいスレッドを作成。
+# スレッドとは、プログラムの中で別の作業を同時に行うことができる小さな作業員のこと
+# target=run_async_task→新しい作業員（スレッド）に、run_async_task関数を実行してもらうという意味
+# .start()は開始
+def on_button_click():
+    threading.Thread(target=run_async_task).start()
 
 
 
@@ -211,7 +230,7 @@ if __name__ == '__main__':
         if not mp4_path:
             return
 
-        # .lower()-> 全てを小文字にする　mp4の部分を大文字が混ざってしまう可能性があるため
+        # .lower()-> 全てを小文字にする mp4の部分を大文字が混ざってしまう可能性があるため
         # .endswith('.mp4')-> 拡張子部分を取得して引数に指定されてるものになってるか確認
         # もし拡張子がmp4でなかったらエラーメッセージを出す。
         if not mp4_path.lower().endswith('.mp4'):
@@ -293,7 +312,7 @@ if __name__ == '__main__':
 
 
     # runningボタン作成
-    submit_button = ttk.Button(running_frame, text="翻訳開始", command=submit_click)
+    submit_button = ttk.Button(running_frame, text="翻訳開始", command=on_button_click)
     submit_button.grid(row=5, column=0, padx=20)
 
 
