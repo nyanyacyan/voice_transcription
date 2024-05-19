@@ -10,6 +10,7 @@ import os
 from dotenv import load_dotenv
 from tqdm import tqdm
 from faster_whisper import WhisperModel
+import time
 
 load_dotenv()
 
@@ -29,12 +30,20 @@ class WhisperTranscription:
         # ここにYouTubeとmp４それぞれが音声データに変換した入るのpath出す関数の返したものを入れる
         self.audio_file_path = audio_file_path
 
+
+# --------------------------------------------------------------------------------
+
+
     def whisper_transcription(self):
-        self.logger.debug(self.audio_file_path)
+        self.logger.debug(f"self.audio_file_path: {self.audio_file_path}")
+
+        start_time = time.time()
 
         # ここでモデルを調整する
         # tiny, base, small, medium, large-v2, large-v3
         model = WhisperModel("large-v3", device="cpu", compute_type="int8")
+
+        self.logger.info(f"model: {model}")
 
         # データをsegmentsとinfoに分けて保管
         self.audio_file_path
@@ -43,8 +52,6 @@ class WhisperTranscription:
             beam_size=5,  # 精度のクオリティを調節するもの数値を大きくする精度アップ時間ダウン
             vad_filter=True
         )
-
-
 
         self.logger.debug("表示する言語 '%s' 精度 %f\n" % (info.language, info.language_probability))
 
@@ -68,3 +75,10 @@ class WhisperTranscription:
         with open('results_text_box/whisper_write_file.txt', 'w', encoding='utf-8') as output_file:
             for segment in results:
                 output_file.write(f"{segment['start']} -> {segment['end']} {segment['text']})\n")
+
+
+        end_time = time.time()
+
+        diff_time = start_time - end_time
+
+        self.logger.info(f"diff_time: {diff_time}")
