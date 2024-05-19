@@ -16,13 +16,15 @@ load_dotenv()
 from my_decorators.logging_decorators import debug_logger_decorator
 from my_decorators.error_handling_decorators import error_handling_decorator
 
+####################################################################################
+
 
 class WhisperTranscription:
     @debug_logger_decorator
     @error_handling_decorator
     async def whisper_transcription(self):
         audio_file = os.getenv("AUDIO_FILE")
-        model = WhisperModel("base", device="cpu", compute_type="int8")
+        model = WhisperModel("large", device="cpu", compute_type="int8")
 
         segments, info = model.transcribe(
             audio_file,
@@ -39,3 +41,6 @@ class WhisperTranscription:
             # セクションごとに時間を表示
             for segment in segments:
                 output_file.write("[%.2fs -> %.2fs] %s\n" % (segment.start, segment.end, segment.text))
+
+
+####################################################################################

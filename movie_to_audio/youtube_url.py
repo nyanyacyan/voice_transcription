@@ -14,6 +14,10 @@ from logger.debug_logger import Logger
 
 load_dotenv()
 
+
+###################################################################################
+
+
 class YoutubeToMp3:
     def __init__(self,youtube_url, debug_mode=False):
         self.youtube_url = youtube_url
@@ -22,6 +26,9 @@ class YoutubeToMp3:
         self.logger_instance = Logger(__name__, debug_mode=debug_mode)
         self.logger = self.logger_instance.get_logger()
         self.debug_mode = debug_mode
+
+
+###################################################################################
 
 
     def youtube_to_mp3(self):
@@ -68,11 +75,10 @@ class YoutubeToMp3:
             return matching_files[0]
         raise Exception("ファイルが見つかりません。")
 
-
+###################################################################################
 
 class YoutubeToMp4:
-    def __init__(self,youtube_url, debug_mode=False):
-        self.youtube_url = youtube_url
+    def __init__(self, debug_mode=False):
 
         # Loggerクラスを初期化
         debug_mode = os.getenv('DEBUG_MODE', 'False') == 'True'
@@ -80,8 +86,13 @@ class YoutubeToMp4:
         self.logger = self.logger_instance.get_logger()
         self.debug_mode = debug_mode
 
+
+###################################################################################
+# --------------------------------------------------------------------------------
+
+
     # YouTube URLからmp4でダウンロード
-    def youtube_to_mp4(self):
+    def youtube_to_mp4(self, youtube_url):
         # ダウンロードするディレクトリを指定
         download_directory = "downloads"
 
@@ -98,7 +109,10 @@ class YoutubeToMp4:
 
         # 実際にYoutubeDLクラスを使って上記で指定したオプションを使ってオブジェクトにしてるイメージ
         with YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(self.youtube_url, download=True)
+            info_dict = ydl.extract_info(youtube_url, download=True)
             movie_title = info_dict.get('title', 'downloaded_file')
             self.logger.debug(f"ダウンロードファイル名: {movie_title}")
             return movie_title
+
+
+# --------------------------------------------------------------------------------

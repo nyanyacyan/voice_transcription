@@ -1,4 +1,4 @@
-#!/Users/nyanyacyan/Desktop/ProgramFile/project_file/voice_transcription/venv_voice_transcription/bin/python3
+#!/Users/nyanyacyan/Desktop/Project_file/voiceTrance/venv_voice_transcription/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys
