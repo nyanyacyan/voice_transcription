@@ -28,10 +28,10 @@ class Test:
             self.logger.info(f"******** youtube_to_mp4 開始 ********")
 
             # ここにアドレスを入力
-            youtube_url = ''
+            youtube_url = 'https://www.youtube.com/watch?v=gc5hdKQzZQI'
             self.logger.info(f"youtube_url: {youtube_url}")
 
-            self.youtube_to_mp4(youtube_url=youtube_url)
+            self.youtube_to_mp4.youtube_to_mp4(youtube_url=youtube_url)
 
 
             self.logger.info(f"******** youtube_to_mp4 終了 ********")
