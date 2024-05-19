@@ -9,6 +9,7 @@ from tkinter import filedialog, messagebox, ttk
 
 from dotenv import load_dotenv
 
+
 # 自作モジュール
 from chatgpt.data_division import ChatgptTextSplitSave
 from chatgpt.dump_manager import DumpManager
