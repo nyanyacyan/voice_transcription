@@ -41,7 +41,7 @@ class WhisperTranscription:
 
         # ここでモデルを調整する
         # tiny, base, small, medium, large-v2, large-v3
-        model = WhisperModel("medium", device="cpu", compute_type="int8")
+        model = WhisperModel("large-v3", device="cpu", compute_type="int8")
 
         self.logger.info(f"model: {model}")
 

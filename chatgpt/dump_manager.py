@@ -37,6 +37,8 @@ class DumpManager:
         self.logger = self.logger_instance.get_logger()
         self.debug_mode = debug_mode
 
+# --------------------------------------------------------------------------------
+
 
     def find_pickle_file(self):
         try:
@@ -53,6 +55,8 @@ class DumpManager:
             existing_data = pd.DataFrame(columns=['from', 'to', 'instruction'])
             return existing_data
 
+# --------------------------------------------------------------------------------
+
 
     def dataframe_updated(self, translate_file):
         existing_data = self.find_pickle_file()  # 既存データ
@@ -60,7 +64,7 @@ class DumpManager:
         # Excelファイルにあるデータをデータフレームに入れ込む（まだpickle_fileには書き込まれてない）
         new_data = pd.read_excel(translate_file, usecols=['from', 'to'])  # 新しいデータ
 
-        # 　axisパラメーターは「.apply」メソッド時に使われる　axis=1は上から順番に行のデータを取得してる-> from列とto列の値を取得
+        # axisパラメーターは「.apply」メソッド時に使われる axis=1は上から順番に行のデータを取得してる-> from列とto列の値を取得
         # .applyは各列（axis=0）各行（axis=1）のデータを取得する
         self.logger.debug("和訳を指定する文章を作成開始（３列目）")
         new_data['instruction'] = new_data.apply(lambda row: f'・「{row["from"]}」は「{row["to"]}」と和訳してください。', axis=1)
@@ -86,6 +90,9 @@ class DumpManager:
         return updated_data
 
 
+# --------------------------------------------------------------------------------
+
+
     def write_pickle_file(self, translate_file):
         updated_data = self.dataframe_updated(translate_file)
 
@@ -93,11 +100,12 @@ class DumpManager:
 
         pd.set_option('display.max_columns', None)
 
-
-
         self.logger.debug(updated_data['instruction'])
 
         # 'wb'はバイナリ書込モード
         # もしpickle_fileがなければ新規作成
         with open(self.pickle_file, 'wb') as handle:
             pickle.dump(updated_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+# --------------------------------------------------------------------------------

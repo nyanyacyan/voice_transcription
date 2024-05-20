@@ -52,8 +52,8 @@ def youtube_process():
     output_dir = 'chatgpt/translate_after_box'
     final_output_file = 'results_text_box/translated_completed.txt'
     translate_instruction = '翻訳指示ファイル.xlsx'
-    # data_division_box = 'chatgpt/data_division_box'
-    # translate_after_box = 'chatgpt/translate_after_box'
+    data_division_box = 'chatgpt/data_division_box'
+    translate_after_box = 'chatgpt/translate_after_box'
 
     try:
         youtube_url = youtube_url_entry.get()
@@ -67,7 +67,7 @@ def youtube_process():
         translation_req_class_inst = TranslationRequest(api_key=api_key)
         translation_req_class_inst.translate_all_files(input_dir, output_dir, translate_instruction)
         translation_req_class_inst.merge_translated_files(output_dir, final_output_file)
-        # translation_req_class_inst.delete_text_files(data_division_box, translate_after_box)
+        translation_req_class_inst.delete_text_files(data_division_box, translate_after_box)
         messagebox.showinfo("完了通知", "翻訳が完了しました。\ntranslated_completed.txtをご覧ください。")
 
     except TypeError as e:
@@ -87,8 +87,8 @@ def mp4_process():
     output_dir = 'chatgpt/translate_after_box'
     final_output_file = 'results_text_box/translated_completed.txt'
     translate_instruction = '翻訳指示ファイル.xlsx'
-    # data_division_box = 'chatgpt/data_division_box'
-    # translate_after_box = 'chatgpt/translate_after_box'
+    data_division_box = 'chatgpt/data_division_box'
+    translate_after_box = 'chatgpt/translate_after_box'
     try:
         mp4_path = mp4_path_entry.get()
         mp4_to_mp3_inst = Mp4ToMp3(mp4_path)
@@ -101,7 +101,7 @@ def mp4_process():
         translation_req_class_inst = TranslationRequest(api_key=api_key)
         translation_req_class_inst.translate_all_files(input_dir, output_dir, translate_instruction)
         translation_req_class_inst.merge_translated_files(output_dir, final_output_file)
-        # translation_req_class_inst.delete_text_files(data_division_box, translate_after_box)
+        translation_req_class_inst.delete_text_files(data_division_box, translate_after_box)
         messagebox.showinfo("完了通知", "翻訳が完了しました。\ntranslated_completed.txtをご覧ください。")
 
     except TypeError as e:
