@@ -33,6 +33,7 @@ class ChatgptTranslator:
 
         #! ここにどんどん会話を追加していくイメージ
         self.GptHistory = []
+        self.retryCount = 1
 
 # --------------------------------------------------------------------------------
 
@@ -68,6 +69,27 @@ class ChatgptTranslator:
 
 
 # --------------------------------------------------------------------------------
+# Textから除外
+
+    def _text_clean(self, text):
+        try:
+            self.logger.info("******** text_clean 開始 ********")
+
+            self.logger.debug(f"text: {text}")
+
+            # Textの中身を整えたい処理を記載
+            clean_text = text.replace(')', '').replace('\n\n', '\n')
+
+            self.logger.debug(f"clean_text: {clean_text}")
+
+
+            self.logger.info("******** text_clean 終了 ********")
+
+        except Exception as e:
+            self.logger.error(f"text_clean: 処理中にエラーが発生 {e}")
+
+
+# --------------------------------------------------------------------------------
 
 
     # @debug_logger_decorator
@@ -89,14 +111,15 @@ class ChatgptTranslator:
         for message in messages:
             self.GptHistory.append({"role" : message['role'], "content" : message["content"]})
 
-        # リストはそのままでは書き込めないから分岐させる
-        content_to_write = "\n".join(self.GptHistory)
+        # 辞書はそのままTextにすることができないので文字列（F文字列）に置き換えて書き込めるようにする
+        content_to_write = "\n".join(f"{item['role']} : {item['content']}" for item in self.GptHistory)
 
         with open('results_text_box/chatgpt_to_sentence.txt', 'w', encoding='utf-8') as f:
             f.write(content_to_write)
 
         # OpenAI APIへのリクエスト送信
         res = self.client.chat.completions.create(
+            # res = openai.ChatCompletion.create(
             # モデルを選択
             model = "gpt-3.5-turbo-0125",
 
@@ -110,12 +133,12 @@ class ChatgptTranslator:
 
         # 応答
         translate_text = res.choices[0].message.content
-        self.GptHistory.append("role": "assistant", "content": translate_text)
+        self.GptHistory.append({"role": "assistant", "content": translate_text})
 
         self.logger.debug(translate_text)
 
         # ChatGPTからの文章をクリーン-> 必要があれば追加していく
-        clean_text = translate_text.replace(')', '').replace('\n\n', '\n')
+        clean_text = self._text_clean(translate_text)
 
         self.logger.debug(clean_text)
         return clean_text
@@ -202,7 +225,7 @@ class ChatgptTranslator:
             self.logger.debug(f"before_text_file: {before_text_file}")
             self.logger.debug(f"full_instructions: {full_instructions}")
 
-            againMessages  = f"余計な文章などが入ってる可能性があります。下記の翻訳支持似合うものに忠誠してください。\n\n翻訳指示:\n\n1. 翻訳対象: このリクエストに含まれる英語および韓国語のテキストを全て日本語に翻訳してください。\n\n2. 特定用語の指定翻訳:\n{full_instructions}\n\n3. 翻訳のルール:\n・省略せずに全文を翻訳してください。\n・タイムスタンプは原文どおりに保持してください。\n・改行は各テキストブロックの終わりにのみ行ってください。\n・翻訳の際、コメントは加えないでください。\n改善された翻訳指示の例:\n翻訳テキストを提出する際には、以下のフォーマットルールに注意してください：\n\n\n**タイムスタンプと翻訳テキストは同じ行に記載してください。**タイムスタンプの直後に翻訳テキストを続けてください。改行は許可されていません。\n\n正しい例: 14.69 -> 17.39 こんにちは！今日の仕事はどうですか？\n\n誤った例: 14.69 -> 17.39\nこんにちは！今日の仕事はどうですか？\n\n**改行は各テキストブロックの終わり、つまり一連の対話や段落が完全に終了した後のみに行ってください。**これは、テキストが読みやすく、整理されていることを保証するためです。\n\n翻訳する部分は省略せずに翻訳してください。\n\n翻訳以外の文言は必ず入れないでください。\n\n同じテキストが３つ以上ある場合には最初のテキスト以外は消すようにしてください。\n\nテキスト:\n{before_text_file}\n\n"
+            againMessages  = f"余計な文章などが入ってる可能性があります。下記の翻訳の支持に沿って再度レスポンスしてください。\n\n翻訳指示:\n\n1. 翻訳対象: このリクエストに含まれる英語および韓国語のテキストを全て日本語に翻訳してください。\n\n2. 特定用語の指定翻訳:\n{full_instructions}\n\n3. 翻訳のルール:\n・省略せずに全文を翻訳してください。\n・タイムスタンプは原文どおりに保持してください。\n・改行は各テキストブロックの終わりにのみ行ってください。\n・翻訳の際、コメントは加えないでください。\n改善された翻訳指示の例:\n翻訳テキストを提出する際には、以下のフォーマットルールに注意してください：\n\n\n**タイムスタンプと翻訳テキストは同じ行に記載してください。**タイムスタンプの直後に翻訳テキストを続けてください。改行は許可されていません。\n\n正しい例: 14.69 -> 17.39 こんにちは！今日の仕事はどうですか？\n\n誤った例: 14.69 -> 17.39\nこんにちは！今日の仕事はどうですか？\n\n**改行は各テキストブロックの終わり、つまり一連の対話や段落が完全に終了した後のみに行ってください。**これは、テキストが読みやすく、整理されていることを保証するためです。\n\n翻訳する部分は省略せずに翻訳してください。\n\n翻訳以外の文言は必ず入れないでください。\n\n同じテキストが３つ以上ある場合には最初のテキスト以外は消すようにしてください。\n\nテキスト:\n{before_text_file}\n\n"
 
             self.logger.info("******** _getAgainPrompt 開始 ********")
 
@@ -216,22 +239,25 @@ class ChatgptTranslator:
 # --------------------------------------------------------------------------------
 
 
-    def handle_request(self, firstPrompt, secondPrompt):
+    def handle_request(self, firstPrompt, againPrompt):
         try:
             self.logger.info("******** handle_request 開始 ********")
             self.logger.debug("翻訳処理開始")
 
-            self.logger.debug(f"prompt: {firstPrompt}")
+            self.logger.debug(f"prompt: \n{firstPrompt}")
+            self.logger.debug(f"againPrompt: \n{againPrompt}")
+
 
             # 初回のリクエスト実施
             translated_text = self.chatgpt_request(firstPrompt)
 
-            retryCount = 1
+            while self._isCheckedResponse(firstPrompt) and self.retryCount < 4:
+                self.logger.warning(f"パターン以外の文字があるためリトライ {self.retryCount}回目")
+                translated_text = self.chatgpt_request(againPrompt)
+                self.retryCount += 1
 
-            while self._isCheckedResponse(firstPrompt):
-                self.logger.warning(f"パターン以外の文字があるためリトライ {retryCount}回目")
-                translated_text = self.chatgpt_request(secondPrompt)
-                retryCount += 1
+                if self.retryCount >= 4:
+                    raise Exception(f"{self.retryCount}回目まで実施: ChatGPTの返信内容に問題がある可能性が高い")
 
             self.logger.info("******** handle_request 終了 ********")
 
