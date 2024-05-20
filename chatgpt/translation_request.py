@@ -48,7 +48,7 @@ class TranslationRequest:
         self.logger.debug(f"読込する分割されたファイル名: {base_name}")
 
         # 翻訳クラスの実行（実行時、API KEYが必要）
-        translated_text = self.chatgpt_translator_inst.chatgpt_translator(before_file, translate_instruction)
+        translated_text = self.chatgpt_translator_inst.handle_request(before_file, translate_instruction)
         self.logger.debug(f"受け取った翻訳内容: {translated_text}")
 
         # output_dir + base_name（元々のファイル名）することでパスにしてる
